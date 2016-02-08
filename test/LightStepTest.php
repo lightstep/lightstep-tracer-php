@@ -1,6 +1,6 @@
 <?php
 
-// Abbrev. to grab protected fields -- useful for the unit tests!
+// Helper to grab protected fields -- useful for the unit tests!
 function peek($obj, $field) {
     return PHPUnit_Framework_Assert::readAttribute($obj, $field);
 }
