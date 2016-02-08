@@ -1,0 +1,5 @@
+machine:
+    php:
+        version:
+            5.5.21
+
