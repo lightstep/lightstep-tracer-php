@@ -15,7 +15,11 @@ define("LIGHTSTEP_JOIN_KEY_END_USER_ID", "end_user_id");
  * This interface is most commonly accessed via LightStep::getInstance()
  * singleton.
  */
-interface Runtime {
+interface Tracer {
+
+    // ---------------------------------------------------------------------- //
+    // OpenTracing API
+    // ---------------------------------------------------------------------- //
 
     /**
      * Creates a span object to record the start and finish of an application
@@ -23,56 +27,27 @@ interface Runtime {
      * about this operation, such as which user it is being done on behalf
      * of and log records with arbitrary payload data.
      *
-     * @return ActiveSpan
+     * @param string $operationName the logical name to use for the operation
+     *                              this span is tracking
+     * @param array $fields optional array of key-value pairs. Valid pairs are:
+     *        'parent' Span the span to use as this span's parent
+     *        'tags' array string-string pairs to set as tags on this span
+     *        'startTime' float Unix time (in milliseconds) representing the
+     *        					start time of this span. Useful for retroactively
+     *        					created spans.
+     * @return Span
      */
-    public function startSpan();
+    public function startSpan($operationName, $fields);
 
-    /**
-     * Creates a printf-style log statement that will be associated with
-     * this particular operation instance.
-     *
-     * All arguments after the format string will automatically be captured
-     * as part of the log payload.
-     *
-     * @param string $fmt a format string as accepted by sprintf
-     */
-    public function infof($fmt);
+    // TODO: Not yet supported
+    //public function inject($span, $format, $carrier);
 
-    /**
-     * Creates a printf-style warning log statement that will be associated with
-     * this particular operation instance.
-     *
-     * All arguments after the format string will automatically be captured
-     * as part of the log payload.
-     *
-     * @param string $fmt a format string as accepted by sprintf
-     */
-    public function warnf($fmt);
+    // TODO: Not yet supported
+    //public function join($span, $format, $carrier);
 
-    /**
-     * Creates a printf-style error log statement that will be associated with
-     * this particular operation instance.
-     *
-     * All arguments after the format string will automatically be captured
-     * as part of the log payload.
-     *
-     * @param string $fmt a format string as accepted by sprintf
-     */
-    public function errorf($fmt);
-
-    /**
-     * Creates a printf-style fatal log statement that will be associated with
-     * this particular operation instance.
-     *
-     * All arguments after the format string will automatically be captured
-     * as part of the log payload.
-     *
-     * Note: a fatal log will exit the PHP process after the log record is
-     * created.
-     *
-     * @param string $fmt a format string as accepted by sprintf
-     */
-    public function fatalf($fmt);
+    // ---------------------------------------------------------------------- //
+    // LightStep Extentsions
+    // ---------------------------------------------------------------------- //
 
     /**
      * Manually causes any buffered log and span records to be flushed to the
@@ -80,7 +55,6 @@ interface Runtime {
      * logs and spans are sent incrementally over time and at process exit.
      */
     public function flush();
-
 
     /**
      * Returns the generated unique identifier for the runtime.
@@ -102,13 +76,82 @@ interface Runtime {
 /**
  * Interface for the handle to an active span.
  */
-interface ActiveSpan {
+interface Span {
+
+    // ---------------------------------------------------------------------- //
+    // OpenTracing API
+    // ---------------------------------------------------------------------- //
+
     /**
      * Sets the name of the operation that the span represents.
      *
      * @param string $name name of the operation
      */
-    public function setOperation($name);
+    public function setOperationName($name);
+
+    /**
+     * Finishes the active span. This should always be called at the
+     * end of the logical operation that the span represents.
+     */
+    public function finish();
+
+    /**
+     * Returns the instance of the Tracer that created the Span.
+     *
+     * @return Tracer the instance of the Tracer that created this Span.
+     */
+    public function tracer();
+
+    /**
+     * Sets a tag on the span.  Tags belong to a span instance itself and are
+     * not transferred to child or across process boundaries.
+     *
+     * @param string key the key of the tag
+     * @param string value the value of the tag
+     */
+    public function setTag($key, $value);
+
+    /**
+     * Sets a baggage item on the span.  Baggage is transferred to children and
+     * across process boundaries; use sparingly.
+     *
+     * @param string key the key of the baggage item
+     * @param string value the value of the baggage item
+     */
+    public function setBaggageItem($key, $value);
+
+    /**
+     * Gets a baggage item on the span.
+     *
+     * @param string key the key of the baggage item
+     * @param string value the value of the baggage item
+     */
+    public function getBaggageItem($key);
+
+    /**
+     * Logs a stably named event along with an optional payload and associates
+     * it with the span.
+     *
+     * @param string event the name used to identify the event
+     * @param mixed payload any data to be associated with the event
+     */
+    public function logEvent($event, $payload = NULL);
+
+    /**
+     * Logs a stably named event along with an optional payload and associates
+     * it with the span.
+     *
+     * @param array fields a set of key-value pairs for specifying an event.
+     *        'event' string, required the stable name of the event
+     *        'payload' mixed, optional any data to associate with the event
+     *        'timestamp' float, optional Unix time (in milliseconds)
+     *        		representing the event time.
+     */
+    public function log($fields);
+
+    // ---------------------------------------------------------------------- //
+    // LightStep Extentsions
+    // ---------------------------------------------------------------------- //
 
     /**
      * Sets a string uniquely identifying the user on behalf the
@@ -127,10 +170,9 @@ interface ActiveSpan {
      * given parent operation. This provides the instrumentation with
      * additional information to construct the trace.
      *
-     * @param ActiveSpan $span the parent span of this span
+     * @param Span $span the parent span of this span
      */
     public function setParent($span);
-
 
     /**
      * Sets a trace join ID key-value pair.
@@ -139,20 +181,6 @@ interface ActiveSpan {
      * @param string $value the value to associate with the given key.
      */
     public function addTraceJoinId($key, $value);
-
-    /**
-     * Adds an attribute to the span.
-     *
-     * Note: this is currently intended for internal use only.
-     */
-    public function addAttribute($key, $value);
-
-
-    /**
-     * Finishes the active span. This should always be called at the
-     * end of the logical operation that the span represents.
-     */
-    public function finish();
 
     /**
      * Creates a printf-style log statement that will be associated with

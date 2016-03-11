@@ -16,8 +16,8 @@ class TransportUDP {
         }
 
         $this->_sock = $sock;
-        $this->_host = $options['service_host'];
-        $this->_port = $options['service_port'];
+        $this->_host = $options['collector_host'];
+        $this->_port = $options['collector_port'];
     }
 
     public function flushReport($auth, $report) {

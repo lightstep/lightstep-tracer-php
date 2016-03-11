@@ -9,7 +9,7 @@ class LightStepTest extends PHPUnit_Framework_TestCase {
 
     public function testGetInstance() {
         $inst = LightStep::getInstance("test_group", "1234567890");
-        $this->assertInstanceOf("\LightStepBase\Client\ClientRuntime", $inst);
+        $this->assertInstanceOf("\LightStepBase\Client\ClientTracer", $inst);
 
         // Is it really a singleton?
         $inst2 = LightStep::getInstance("test_group", "1234567890");

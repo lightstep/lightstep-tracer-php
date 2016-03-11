@@ -13,18 +13,18 @@ composer require lightstep/tracer
 
 require __DIR__ . '/vendor/autoload.php';
 
-LightStep::initialize('examples/trivial_process', '{{access_token_goes_here}}');
-LightStep::infof("The current unix time = %d", time());
+LightStep::initGlobalTracer('examples/trivial_process', '{{your_access_token}}');
 
-$span = LightStep::startSpan();
-$span->setOperation("trivial/loop");
+$span = LightStep::startSpan("trivial/loop");
 for ($i = 0; $i < 10; $i++) {
-    $span->infof("Loop iteration %d", $i);
+    $span->logEvent("loop_iteration", $i);
     echo "The current unix time is " . time() . "\n";
     sleep(1);
 }
 $span->finish();
 ```
+
+See `lib/api.php` for detailed API documentation.
 
 ## License
 

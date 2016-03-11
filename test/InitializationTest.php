@@ -7,58 +7,57 @@ class InitializationTest extends PHPUnit_Framework_TestCase {
         completed, the runtime should buffer that data until the init call.
      */
     public function testOutOfOrderInitializationDoesntFail() {
+        $runtime = LightStep::newTracer(NULL, NULL);
+        $span = $runtime->startSpan("test_span");
+        $span->infof("log000");
 
-        $runtime = LightStep::newRuntime(NULL, NULL);
-
-        $runtime->infof("log000");
-
-        $span = $runtime->startSpan();
-        $span->setOperation("operation/000");
-        $span->finish();
+        $span2 = $runtime->startSpan("operation/000");
+        $span2->finish();
 
         $runtime->flush();
 
         $runtime->options(array(
-            'group_name' => 'init_test_group',
+            'component_name' => 'init_test_group',
             'access_token' => '1234567890',
         ));
+        $span->finish();
         $runtime->flush();
     }
 
     public function testMultipleInitCalls() {
+        $runtime = LightStep::newTracer(NULL, NULL);
+        $span = $runtime->startSpan("test_span");
 
-        $runtime = LightStep::newRuntime(NULL, NULL);
         $this->assertGreaterThan(0, peek($runtime, "_options")['max_log_records']);
         $this->assertGreaterThan(0, peek($runtime, "_options")['max_span_records']);
 
         for ($i = 0; $i < 100; $i++) {
-            $runtime->infof("log%03d", 3 * $i);
+            $span->infof("log%03d", 3 * $i);
 
             // Redundant calls are fine as long as the configuration
             // is the same
             $runtime->options(array(
-                'group_name'   => 'init_test_group',
+                'component_name'   => 'init_test_group',
                 'access_token' => '1234567890',
             ));
 
-           $runtime->infof("log%03d", 7 * $i);
+           $span->infof("log%03d", 7 * $i);
         }
+        $span->finish();
     }
 
     public function testSpanBufferingBeforeInit() {
-        $runtime = LightStep::newRuntime(NULL, NULL);
-        $span = $runtime->startSpan();
-        $span->setOperation("first");
+        $runtime = LightStep::newTracer(NULL, NULL);
+        $span = $runtime->startSpan("first");
         $span->infof('Hello %s', 'World');
         $span->finish();
 
         $runtime->options(array(
-            'group_name'   => 'init_test_group',
+            'component_name'   => 'init_test_group',
             'access_token' => '1234567890',
         ));
 
-        $span = $runtime->startSpan();
-        $span->setOperation("second");
+        $span = $runtime->startSpan("second");
         $span->infof('Hola %s', 'Mundo');
         $span->finish();
 

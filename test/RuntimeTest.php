@@ -3,7 +3,7 @@
 class RuntimeTest extends PHPUnit_Framework_TestCase {
 
     public function testSpanMaxRecords() {
-        $runtime = LightStep::newRuntime("test_group", "1234567890", array(
+        $runtime = LightStep::newTracer("test_group", "1234567890", array(
             'debug_disable_flush' => TRUE,
         ));
 
@@ -16,8 +16,7 @@ class RuntimeTest extends PHPUnit_Framework_TestCase {
 
         // Before the max is hit...
         for ($i = 0; $i < $maxRecords; $i++) {
-            $span = $runtime->startSpan();
-            $span->setOperation("loop_span");
+            $span = $runtime->startSpan("loop_span");
             $span->finish();
             $this->assertEquals($i + 1, count(peek($runtime, "_spanRecords")));
         }
@@ -25,8 +24,7 @@ class RuntimeTest extends PHPUnit_Framework_TestCase {
 
         // After the max has been hit...
         for ($i = 0; $i < 10 * $maxRecords; $i++) {
-            $span = $runtime->startSpan();
-            $span->setOperation("loop_span");
+            $span = $runtime->startSpan("loop_span");
             $span->finish();
             $this->assertEquals($maxRecords, count(peek($runtime, "_spanRecords")));
         }

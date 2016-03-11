@@ -16,7 +16,6 @@ use Thrift\Protocol\TProtocol;
 use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TApplicationException;
 
-
 class KeyValue {
   static $_TSPEC;
 
@@ -872,6 +871,10 @@ class SpanRecord {
    * @var bool
    */
   public $error_flag = null;
+  /**
+   * @var \CroutonThrift\LogRecord[]
+   */
+  public $log_records = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
@@ -918,6 +921,15 @@ class SpanRecord {
           'var' => 'error_flag',
           'type' => TType::BOOL,
           ),
+        10 => array(
+          'var' => 'log_records',
+          'type' => TType::LST,
+          'etype' => TType::STRUCT,
+          'elem' => array(
+            'type' => TType::STRUCT,
+            'class' => '\CroutonThrift\LogRecord',
+            ),
+          ),
         );
     }
     if (is_array($vals)) {
@@ -944,6 +956,9 @@ class SpanRecord {
       }
       if (isset($vals['error_flag'])) {
         $this->error_flag = $vals['error_flag'];
+      }
+      if (isset($vals['log_records'])) {
+        $this->log_records = $vals['log_records'];
       }
     }
   }
@@ -1045,6 +1060,24 @@ class SpanRecord {
             $xfer += $input->skip($ftype);
           }
           break;
+        case 10:
+          if ($ftype == TType::LST) {
+            $this->log_records = array();
+            $_size26 = 0;
+            $_etype29 = 0;
+            $xfer += $input->readListBegin($_etype29, $_size26);
+            for ($_i30 = 0; $_i30 < $_size26; ++$_i30)
+            {
+              $elem31 = null;
+              $elem31 = new \CroutonThrift\LogRecord();
+              $xfer += $elem31->read($input);
+              $this->log_records []= $elem31;
+            }
+            $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
         default:
           $xfer += $input->skip($ftype);
           break;
@@ -1081,9 +1114,9 @@ class SpanRecord {
       {
         $output->writeListBegin(TType::STRUCT, count($this->join_ids));
         {
-          foreach ($this->join_ids as $iter26)
+          foreach ($this->join_ids as $iter32)
           {
-            $xfer += $iter26->write($output);
+            $xfer += $iter32->write($output);
           }
         }
         $output->writeListEnd();
@@ -1108,9 +1141,9 @@ class SpanRecord {
       {
         $output->writeListBegin(TType::STRUCT, count($this->attributes));
         {
-          foreach ($this->attributes as $iter27)
+          foreach ($this->attributes as $iter33)
           {
-            $xfer += $iter27->write($output);
+            $xfer += $iter33->write($output);
           }
         }
         $output->writeListEnd();
@@ -1120,6 +1153,23 @@ class SpanRecord {
     if ($this->error_flag !== null) {
       $xfer += $output->writeFieldBegin('error_flag', TType::BOOL, 9);
       $xfer += $output->writeBool($this->error_flag);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->log_records !== null) {
+      if (!is_array($this->log_records)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('log_records', TType::LST, 10);
+      {
+        $output->writeListBegin(TType::STRUCT, count($this->log_records));
+        {
+          foreach ($this->log_records as $iter34)
+          {
+            $xfer += $iter34->write($output);
+          }
+        }
+        $output->writeListEnd();
+      }
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
@@ -1559,15 +1609,15 @@ class ReportRequest {
         case 3:
           if ($ftype == TType::LST) {
             $this->span_records = array();
-            $_size28 = 0;
-            $_etype31 = 0;
-            $xfer += $input->readListBegin($_etype31, $_size28);
-            for ($_i32 = 0; $_i32 < $_size28; ++$_i32)
+            $_size35 = 0;
+            $_etype38 = 0;
+            $xfer += $input->readListBegin($_etype38, $_size35);
+            for ($_i39 = 0; $_i39 < $_size35; ++$_i39)
             {
-              $elem33 = null;
-              $elem33 = new \CroutonThrift\SpanRecord();
-              $xfer += $elem33->read($input);
-              $this->span_records []= $elem33;
+              $elem40 = null;
+              $elem40 = new \CroutonThrift\SpanRecord();
+              $xfer += $elem40->read($input);
+              $this->span_records []= $elem40;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1577,15 +1627,15 @@ class ReportRequest {
         case 4:
           if ($ftype == TType::LST) {
             $this->log_records = array();
-            $_size34 = 0;
-            $_etype37 = 0;
-            $xfer += $input->readListBegin($_etype37, $_size34);
-            for ($_i38 = 0; $_i38 < $_size34; ++$_i38)
+            $_size41 = 0;
+            $_etype44 = 0;
+            $xfer += $input->readListBegin($_etype44, $_size41);
+            for ($_i45 = 0; $_i45 < $_size41; ++$_i45)
             {
-              $elem39 = null;
-              $elem39 = new \CroutonThrift\LogRecord();
-              $xfer += $elem39->read($input);
-              $this->log_records []= $elem39;
+              $elem46 = null;
+              $elem46 = new \CroutonThrift\LogRecord();
+              $xfer += $elem46->read($input);
+              $this->log_records []= $elem46;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1616,15 +1666,15 @@ class ReportRequest {
         case 9:
           if ($ftype == TType::LST) {
             $this->counters = array();
-            $_size40 = 0;
-            $_etype43 = 0;
-            $xfer += $input->readListBegin($_etype43, $_size40);
-            for ($_i44 = 0; $_i44 < $_size40; ++$_i44)
+            $_size47 = 0;
+            $_etype50 = 0;
+            $xfer += $input->readListBegin($_etype50, $_size47);
+            for ($_i51 = 0; $_i51 < $_size47; ++$_i51)
             {
-              $elem45 = null;
-              $elem45 = new \CroutonThrift\NamedCounter();
-              $xfer += $elem45->read($input);
-              $this->counters []= $elem45;
+              $elem52 = null;
+              $elem52 = new \CroutonThrift\NamedCounter();
+              $xfer += $elem52->read($input);
+              $this->counters []= $elem52;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1660,9 +1710,9 @@ class ReportRequest {
       {
         $output->writeListBegin(TType::STRUCT, count($this->span_records));
         {
-          foreach ($this->span_records as $iter46)
+          foreach ($this->span_records as $iter53)
           {
-            $xfer += $iter46->write($output);
+            $xfer += $iter53->write($output);
           }
         }
         $output->writeListEnd();
@@ -1677,9 +1727,9 @@ class ReportRequest {
       {
         $output->writeListBegin(TType::STRUCT, count($this->log_records));
         {
-          foreach ($this->log_records as $iter47)
+          foreach ($this->log_records as $iter54)
           {
-            $xfer += $iter47->write($output);
+            $xfer += $iter54->write($output);
           }
         }
         $output->writeListEnd();
@@ -1709,9 +1759,9 @@ class ReportRequest {
       {
         $output->writeListBegin(TType::STRUCT, count($this->counters));
         {
-          foreach ($this->counters as $iter48)
+          foreach ($this->counters as $iter55)
           {
-            $xfer += $iter48->write($output);
+            $xfer += $iter55->write($output);
           }
         }
         $output->writeListEnd();
@@ -1878,15 +1928,15 @@ class ReportResponse {
         case 1:
           if ($ftype == TType::LST) {
             $this->commands = array();
-            $_size49 = 0;
-            $_etype52 = 0;
-            $xfer += $input->readListBegin($_etype52, $_size49);
-            for ($_i53 = 0; $_i53 < $_size49; ++$_i53)
+            $_size56 = 0;
+            $_etype59 = 0;
+            $xfer += $input->readListBegin($_etype59, $_size56);
+            for ($_i60 = 0; $_i60 < $_size56; ++$_i60)
             {
-              $elem54 = null;
-              $elem54 = new \CroutonThrift\Command();
-              $xfer += $elem54->read($input);
-              $this->commands []= $elem54;
+              $elem61 = null;
+              $elem61 = new \CroutonThrift\Command();
+              $xfer += $elem61->read($input);
+              $this->commands []= $elem61;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1904,14 +1954,14 @@ class ReportResponse {
         case 3:
           if ($ftype == TType::LST) {
             $this->errors = array();
-            $_size55 = 0;
-            $_etype58 = 0;
-            $xfer += $input->readListBegin($_etype58, $_size55);
-            for ($_i59 = 0; $_i59 < $_size55; ++$_i59)
+            $_size62 = 0;
+            $_etype65 = 0;
+            $xfer += $input->readListBegin($_etype65, $_size62);
+            for ($_i66 = 0; $_i66 < $_size62; ++$_i66)
             {
-              $elem60 = null;
-              $xfer += $input->readString($elem60);
-              $this->errors []= $elem60;
+              $elem67 = null;
+              $xfer += $input->readString($elem67);
+              $this->errors []= $elem67;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1939,9 +1989,9 @@ class ReportResponse {
       {
         $output->writeListBegin(TType::STRUCT, count($this->commands));
         {
-          foreach ($this->commands as $iter61)
+          foreach ($this->commands as $iter68)
           {
-            $xfer += $iter61->write($output);
+            $xfer += $iter68->write($output);
           }
         }
         $output->writeListEnd();
@@ -1964,9 +2014,9 @@ class ReportResponse {
       {
         $output->writeListBegin(TType::STRING, count($this->errors));
         {
-          foreach ($this->errors as $iter62)
+          foreach ($this->errors as $iter69)
           {
-            $xfer += $output->writeString($iter62);
+            $xfer += $output->writeString($iter69);
           }
         }
         $output->writeListEnd();
@@ -1979,5 +2029,3 @@ class ReportResponse {
   }
 
 }
-
-

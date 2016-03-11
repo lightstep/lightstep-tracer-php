@@ -3,20 +3,19 @@
 class SpanTest extends PHPUnit_Framework_TestCase {
 
     public function testSpanSetOperation() {
-        $runtime = LightStep::newRuntime("test_group", "1234567890");
-        $span = $runtime->startSpan();
-        $span->setOperation("server/query");
+        $runtime = LightStep::newTracer("test_group", "1234567890");
+        $span = $runtime->startSpan("server/query");
         $span->finish();
 
         $this->assertEquals(peek($span, "_operation"), "server/query");
     }
 
     public function testSpanStartEndMicros() {
-        $runtime = LightStep::newRuntime("test_group", "1234567890");
+        $runtime = LightStep::newTracer("test_group", "1234567890");
 
         $sum = 0;
         for ($i = 0; $i < 50; $i++) {
-            $span = $runtime->startSpan();
+            $span = $runtime->startSpan("start_end");
             usleep(500);
             $span->finish();
 
@@ -36,8 +35,8 @@ class SpanTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testSpanJoinIds() {
-        $runtime = LightStep::newRuntime("test_group", "1234567890");
-        $span = $runtime->startSpan();
+        $runtime = LightStep::newTracer("test_group", "1234567890");
+        $span = $runtime->startSpan("join_id_span");
 
         $span->addTraceJoinId("number", "one");
         $this->assertEquals(count(peek($span, "_joinIds")), 1);
@@ -47,8 +46,8 @@ class SpanTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testSpanLogging() {
-        $runtime = LightStep::newRuntime("test_group", "1234567890");
-        $span = $runtime->startSpan();
+        $runtime = LightStep::newTracer("test_group", "1234567890");
+        $span = $runtime->startSpan("log_span");
         $span->infof("Test %d %f %s", 1, 2.0, "three");
         $span->warnf("Test %d %f %s", 1, 2.0, "three");
         $span->errorf("Test %d %f %s", 1, 2.0, "three");
@@ -56,24 +55,23 @@ class SpanTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testSpanAttributes() {
-        $runtime = LightStep::newRuntime("test_group", "1234567890");
-        $span = $runtime->startSpan();
-        $span->addAttribute("test_attribute_1", "value 1");
-        $span->addAttribute("test_attribute_2", "value 2");
+        $runtime = LightStep::newTracer("test_group", "1234567890");
+        $span = $runtime->startSpan("attributes_span");
+        $span->setTag("test_attribute_1", "value 1");
+        $span->setTag("test_attribute_2", "value 2");
 
-        $this->assertEquals(count(peek($span, "_attributes")), 2);
+        $this->assertEquals(count(peek($span, "_tags")), 2);
 
-        $span->addAttribute("test_attribute_3", "value 3");
+        $span->setTag("test_attribute_3", "value 3");
 
-        $this->assertEquals(count(peek($span, "_attributes")), 3);
+        $this->assertEquals(count(peek($span, "_tags")), 3);
 
         $span->finish();
     }
 
     public function testSpanThriftRecord() {
-        $runtime = LightStep::newRuntime("test_group", "1234567890");
-        $span = $runtime->startSpan();
-        $span->setOperation("hello/world");
+        $runtime = LightStep::newTracer("test_group", "1234567890");
+        $span = $runtime->startSpan("hello/world");
         $span->setEnduserId("dinosaur_sr");
         $span->finish();
 
