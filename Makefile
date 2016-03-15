@@ -27,8 +27,11 @@ inc_version:
 # Packagist looks for new tags in the git repo to find newly published
 # packages
 .PHONY: publish
-publish:
+publish: inc_version
+	git add .
+	git commit -m "Increment version to $(shell cat VERSION)"
 	git tag $(shell cat VERSION)
+	git push -u origin master
 	git push -u origin master --tags
 
 # An internal LightStep target for regenerating the thrift protocol files
