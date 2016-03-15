@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdoc>
+    <title>LightStep Instrumentation Library</title>
+    <parser>
+        <target>intermediate/apidocs</target>
+        <encoding>utf8</encoding>
+        <markers>
+            <item>TODO</item>
+            <item>FIXME</item>
+        </markers>
+        <extensions>
+            <extension>php</extension>
+        </extensions>
+        <visibility>public</visibility>
+    </parser>
+    <transformer>
+        <target>dist/apidocs</target>
+    </transformer>
+    <transformations>
+        <template name="./assets/doc_templates/clean2" />
+    </transformations>
+    <files>
+        <file>lib/LightStep.php</file>
+        <file>lib/api.php</file>
+    </files>
+</phpdoc>

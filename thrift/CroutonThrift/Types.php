@@ -16,6 +16,7 @@ use Thrift\Protocol\TProtocol;
 use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TApplicationException;
 
+
 class KeyValue {
   static $_TSPEC;
 
@@ -2029,3 +2030,5 @@ class ReportResponse {
   }
 
 }
+
+

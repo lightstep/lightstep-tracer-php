@@ -1,3 +1,5 @@
 .idea/
 intermediate/
-tmp-publish/
+
+# Ignore only the top-level vendor directory
+/vendor/

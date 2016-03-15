@@ -164,8 +164,8 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         // Tracer attributes
         $runtimeAttrs = array(
-            'cruntime_platform' => 'php',
-            'cruntime_version'  => LIGHTSTEP_VERSION,
+            'lightstep_tracer_platform' => 'php',
+            'lightstep_tracer_version'  => LIGHTSTEP_VERSION,
             'php_version' => phpversion(),
         );
 

@@ -6,6 +6,8 @@
 composer require lightstep/tracer
 ```
 
+The `lightstep/tracer` package is [available here on packagist.org](https://packagist.org/packages/lightstep/tracer).
+
 ## Instrumentation Example
 
 ```php
