@@ -24,6 +24,13 @@ clean:
 inc_version:
 	node scripts/inc_version
 
+# Packagist looks for new tags in the git repo to find newly published
+# packages
+.PHONY: publish
+publish:
+	git tag $(shell cat VERSION)
+	git push -u origin master --tags
+
 # An internal LightStep target for regenerating the thrift protocol files
 .PHONY: thrift
 thrift:
