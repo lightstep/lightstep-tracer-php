@@ -1,3 +1,3 @@
 <?php
-define('LIGHTSTEP_VERSION', '1.0.50');
+define('LIGHTSTEP_VERSION', '1.0.51');
 
