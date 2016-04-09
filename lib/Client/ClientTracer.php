@@ -398,6 +398,9 @@ class ClientTracer implements \LightStepBase\Tracer {
         $span->setEndMicros($this->_util->nowMicros());
         $full = $this->pushWithMax($this->_spanRecords, $span->toThrift(), $this->_options["max_span_records"]);
         if ($full) {
+            if(!isset($this->_counters['dropped_spans'])) {
+                $this->_counters['dropped_spans'] = 0;
+            }
             $this->_counters['dropped_spans']++;
         }
 
