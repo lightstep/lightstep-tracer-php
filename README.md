@@ -1,5 +1,7 @@
 # LightStep Instrumentation Library
 
+[![Circle CI](https://circleci.com/gh/lightstep/lightstep-tracer-php.svg?style=shield)](https://circleci.com/gh/lightstep/lightstep-tracer-php)
+
 ## Install with Composer
 
 ```bash

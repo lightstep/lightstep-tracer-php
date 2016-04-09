@@ -31,7 +31,7 @@ class TransportHTTPJSON {
             var_dump($report);
         }
 
-        $content .= json_encode($report);
+        $content = json_encode($report);
         $content = gzencode($content);
 
         $header = "Host: " . $this->_host . "\r\n";
