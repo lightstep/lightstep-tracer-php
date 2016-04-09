@@ -15,7 +15,7 @@ The `lightstep/tracer` package is [available here on packagist.org](https://pack
 
 require __DIR__ . '/vendor/autoload.php';
 
-LightStep::initGlobalTracer('examples/trivial_process', '{{your_access_token}}');
+LightStep::initGlobalTracer('examples/trivial_process', '{your_access_token}');
 
 $span = LightStep::startSpan("trivial/loop");
 for ($i = 0; $i < 10; $i++) {
