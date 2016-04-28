@@ -104,22 +104,6 @@ class LightStep {
         return self::getInstance()->startSpan($operationName, $fields);
     }
 
-    public static function infof($fmt) {
-        self::getInstance()->_log('I', $fmt, func_get_args());
-    }
-
-    public static function warnf($fmt) {
-        self::getInstance()->_log('W', $fmt, func_get_args());
-    }
-
-    public static function errorf($fmt) {
-        self::getInstance()->_log('E', $fmt, func_get_args());
-    }
-
-    public static function fatalf($fmt) {
-        self::getInstance()->_log('F', $fmt, func_get_args());
-    }
-
     public static function flush() {
         self::getInstance()->flush();
     }
