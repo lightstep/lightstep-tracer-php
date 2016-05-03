@@ -9,6 +9,7 @@ class ClientSpan implements \LightStepBase\Span {
     protected $_tracer = null;
 
     protected $_guid = "";
+    protected $_traceGUID = "";
     protected $_operation = "";
     protected $_tags = array();
     protected $_baggage = array();
@@ -20,6 +21,7 @@ class ClientSpan implements \LightStepBase\Span {
 
     public function __construct($tracer) {
         $this->_tracer = $tracer;
+        $this->_traceGUID = $tracer->_generateUUIDString();
         $this->_guid = $tracer->_generateUUIDString();
     }
 
@@ -37,6 +39,15 @@ class ClientSpan implements \LightStepBase\Span {
 
     public function guid() {
         return $this->_guid;
+    }
+
+    public function traceGUID() {
+        return $this->_traceGUID;
+    }
+
+    public function setTraceGUID($guid) {
+        $this->_traceGUID = $guid;
+        return $this;
     }
 
     public function setStartMicros($start) {
@@ -82,6 +93,10 @@ class ClientSpan implements \LightStepBase\Span {
         return $this->_baggage[$key];
     }
 
+    public function getBaggage() {
+        return $this->_baggage;
+    }
+
     public function setParent($span) {
         // Inherit any join IDs from the parent that have not been explicitly
         // set on the child
@@ -93,6 +108,15 @@ class ClientSpan implements \LightStepBase\Span {
 
         $this->setTag("parent_span_guid", $span->guid());
         return $this;
+    }
+
+    public function setParentGUID($guid) {
+        $this->setTag("parent_span_guid", $guid);
+        return $this;
+    }
+
+    public function getParentGUID() {
+        return $this->_tags['parent_span_guid'];
     }
 
     public function logEvent($event, $payload = NULL) {
@@ -167,6 +191,7 @@ class ClientSpan implements \LightStepBase\Span {
         $rec = new \CroutonThrift\SpanRecord(array(
             "runtime_guid" => strval($this->_tracer->guid()),
             "span_guid" => strval($this->_guid),
+            "trace_guid" => strval($this->_traceGUID),
             "span_name" => strval($this->_operation),
             "oldest_micros" => intval($this->_startMicros),
             "youngest_micros" => intval($this->_endMicros),

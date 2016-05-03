@@ -9,6 +9,9 @@ require_once(dirname(__FILE__) . "/Transports/TransportUDP.php");
 require_once(dirname(__FILE__) . "/Transports/TransportHTTPJSON.php");
 require_once(dirname(__FILE__) . "/Version.php");
 
+define('CARRIER_TRACER_STATE_PREFIX', 'ot-tracer-');
+define('CARRIER_BAGGAGE_PREFIX', 'ot-baggage-');
+
 /**
  * Main implementation of the Tracer interface
  */
@@ -233,6 +236,89 @@ class ClientTracer implements \LightStepBase\Tracer {
         return $span;
     }
 
+    /**
+     * Copies the span data into the given carrier object.
+     */
+    public function inject($span, $format, &$carrier) {
+        switch ($format) {
+        case LIGHTSTEP_FORMAT_TEXT_MAP:
+            $this->injectToArray($span, $carrier);
+            break;
+
+        case LIGHTSTEP_FORMAT_BINARY:
+            throw new Exception('FORMAT_BINARY not yet implemented');
+            break;
+
+        default:
+            $this->_debugRecordError('Unknown inject format');
+            break;
+        }
+    }
+
+    protected function injectToArray($span, &$carrier) {
+        $carrier[CARRIER_TRACER_STATE_PREFIX . 'spanid'] = $span->guid();
+        $traceGUID = $span->traceGUID();
+        if ($traceGUID) {
+            $carrier[CARRIER_TRACER_STATE_PREFIX . 'traceid'] = $traceGUID;
+        }
+        $carrier[CARRIER_TRACER_STATE_PREFIX . 'sampled'] = 'true';
+
+        foreach ($span->getBaggage() as $key => $value) {
+            $carrier[CARRIER_BAGGAGE_PREFIX . $key] = $value;
+        }
+    }
+
+    /**
+     * Creates a new span data from the given carrier object.
+     */
+    public function join($operationName, $format, $carrier) {
+        $span = new ClientSpan($this);
+        $span->setOperationName($operationName);
+        $span->setStartMicros($this->_util->nowMicros());
+
+        switch ($format) {
+        case LIGHTSTEP_FORMAT_TEXT_MAP:
+            $this->joinFromArray($span, $carrier);
+            break;
+
+        case LIGHTSTEP_FORMAT_BINARY:
+            throw new Exception('FORMAT_BINARY not yet implemented');
+            break;
+
+        default:
+            $this->_debugRecordError('Unknown inject format');
+            break;
+        }
+        return $span;
+    }
+
+    protected function joinFromArray($span, $carrier) {
+        foreach ($carrier as $rawKey => $value) {
+            $key = strtolower($rawKey);
+            if ($this->_startsWith($key, CARRIER_TRACER_STATE_PREFIX)) {
+                $shortKey = substr($key, strlen(CARRIER_TRACER_STATE_PREFIX));
+                switch ($shortKey) {
+                case 'traceid':
+                    $span->setTraceGUID($value);
+                    break;
+                case 'spanid':
+                    $span->setParentGUID($value);
+                    break;
+                }
+            } else if ($this->_startsWith($key, CARRIER_BAGGAGE_PREFIX)) {
+                $shortKey = substr($key, strlen(CARRIER_BAGGAGE_PREFIX));
+                $span->setBaggageItem($shortKey, $value);
+            } else {
+                // By convention, LightStep join() ignores unrecognized key-value
+                // pairs.
+            }
+        }
+    }
+
+    protected function _startsWith($haystack, $needle) {
+         return (substr($haystack, 0, strlen($needle)) === $needle);
+    }
+
     // PHP does not have an event loop or timer threads. Instead manually check as
     // new data comes in by calling this method.
     protected function flushIfNeeded() {
@@ -376,12 +462,10 @@ class ClientTracer implements \LightStepBase\Tracer {
     /**
      * Internal use only.
      *
-     * Generates a random ID (not a *true* UUID).
+     * Generates a random ID (not a RFC-4122 UUID).
      */
     public function _generateUUIDString() {
-        return sprintf("%08x%08x%08x%08x",
-            $this->_util->randInt32(),
-            $this->_util->randInt32(),
+        return sprintf("%08x%08x",
             $this->_util->randInt32(),
             $this->_util->randInt32()
         );

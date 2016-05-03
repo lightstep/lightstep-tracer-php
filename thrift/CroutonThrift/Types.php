@@ -847,6 +847,10 @@ class SpanRecord {
   /**
    * @var string
    */
+  public $trace_guid = null;
+  /**
+   * @var string
+   */
   public $runtime_guid = null;
   /**
    * @var string
@@ -882,6 +886,10 @@ class SpanRecord {
       self::$_TSPEC = array(
         1 => array(
           'var' => 'span_guid',
+          'type' => TType::STRING,
+          ),
+        11 => array(
+          'var' => 'trace_guid',
           'type' => TType::STRING,
           ),
         2 => array(
@@ -937,6 +945,9 @@ class SpanRecord {
       if (isset($vals['span_guid'])) {
         $this->span_guid = $vals['span_guid'];
       }
+      if (isset($vals['trace_guid'])) {
+        $this->trace_guid = $vals['trace_guid'];
+      }
       if (isset($vals['runtime_guid'])) {
         $this->runtime_guid = $vals['runtime_guid'];
       }
@@ -986,6 +997,13 @@ class SpanRecord {
         case 1:
           if ($ftype == TType::STRING) {
             $xfer += $input->readString($this->span_guid);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 11:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->trace_guid);
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -1171,6 +1189,11 @@ class SpanRecord {
         }
         $output->writeListEnd();
       }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->trace_guid !== null) {
+      $xfer += $output->writeFieldBegin('trace_guid', TType::STRING, 11);
+      $xfer += $output->writeString($this->trace_guid);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
