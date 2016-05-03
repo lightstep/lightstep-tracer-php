@@ -2,6 +2,11 @@
 
 namespace LightStepBase;
 
+// TODO: these constants should be replaced with OpenTracing constants as soon
+// as a OpenTracing PHP library exists.
+define("LIGHTSTEP_FORMAT_TEXT_MAP", "LIGHTSTEP_FORMAT_TEXT_MAP");
+define("LIGHTSTEP_FORMAT_BINARY", "LIGHTSTEP_FORMAT_BINARY");
+
 /**
  *@internal
  *
@@ -39,11 +44,30 @@ interface Tracer {
      */
     public function startSpan($operationName, $fields);
 
-    // TODO: Not yet supported
-    //public function inject($span, $format, $carrier);
+    /**
+     * Copies the span data into the given carrier object.
+     *
+     * See http://opentracing.io/spec/#inject-and-join.
+     *
+     * @param  Span $span the span object that will populate $carrier
+     * @param  string $format the OpenTracing constant for the format of $carrier
+     * @param  mixed $carrier the carrier object; the type depends on the $format
+     */
+    public function inject($span, $format, &$carrier);
 
-    // TODO: Not yet supported
-    //public function join($span, $format, $carrier);
+    /**
+     * Creates a new span data from the given carrier object.
+     *
+     * See http://opentracing.io/spec/#inject-and-join.
+     *
+     * @param  string $operationName operation name to use for the newly created
+     *                               span
+     * @param  string $format the OpenTracing constant for the format of the
+     *                        carrier object
+     * @param  mixed $carrier carrier object; the type depends on $format
+     * @return Span the newly created Span
+     */
+    public function join($operationName, $format, $carrier);
 
     // ---------------------------------------------------------------------- //
     // LightStep Extentsions
@@ -154,16 +178,11 @@ interface Span {
     // ---------------------------------------------------------------------- //
 
     /**
-     * Sets a string uniquely identifying the user on behalf the
-     * span operation is being run. This may be an identifier such
-     * as unique username or any other application-specific identifier
-     * (as long as it is used consistently for this user).
+     * Returns the unique identifier for the span instance.
      *
-     *
-     *
-     * @param string $id a unique identifier of the
+     * @return string
      */
-    public function setEndUserId($id);
+    public function guid();
 
     /**
      * Explicitly associates this span as a child operation of the
@@ -173,14 +192,6 @@ interface Span {
      * @param Span $span the parent span of this span
      */
     public function setParent($span);
-
-    /**
-     * Sets a trace join ID key-value pair.
-     *
-     * @param string $key the trace key
-     * @param string $value the value to associate with the given key.
-     */
-    public function addTraceJoinId($key, $value);
 
     /**
      * Creates a printf-style log statement that will be associated with
@@ -218,10 +229,28 @@ interface Span {
      */
     public function fatalf($fmt);
 
+    // ---------------------------------------------------------------------- //
+    // Deprecated
+    // ---------------------------------------------------------------------- //
+
     /**
-     * Returns the unique identifier for the span instance.
+     * Sets a string uniquely identifying the user on behalf the
+     * span operation is being run. This may be an identifier such
+     * as unique username or any other application-specific identifier
+     * (as long as it is used consistently for this user).
      *
-     * @return string
+     *
+     *
+     * @param string $id a unique identifier of the current user
      */
-    public function guid();
+    public function setEndUserId($id);
+
+    /**
+     * Sets a trace join ID key-value pair.
+     *
+     * @param string $key the trace key
+     * @param string $value the value to associate with the given key.
+     */
+    public function addTraceJoinId($key, $value);
+
 }
