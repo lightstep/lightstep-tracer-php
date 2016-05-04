@@ -69,6 +69,39 @@ class SpanTest extends PHPUnit_Framework_TestCase {
         $span->finish();
     }
 
+    public function testStartSpanWithParent() {
+        $tracer = LightStep::newTracer("test_group", "1234567890");
+
+        $parent = $tracer->startSpan("parent");
+        $this->assertTrue(strlen($parent->traceGUID()) > 0);
+        $this->assertTrue(strlen($parent->guid()) > 0);
+
+        $child = $tracer->startSpan("child", array(parent => $parent));
+        $this->assertEquals($child->traceGUID(), $parent->traceGUID());
+        $this->assertEquals($child->getParentGUID(), $parent->guid());
+
+        $child->finish();
+        $parent->finish();
+    }
+
+    public function testSetParent() {
+        // NOTE: setParent() is not part of the OpenTracing API. (Reminder this
+        // is a unit test so non-API calls are ok!)
+        $tracer = LightStep::newTracer("test_group", "1234567890");
+
+        $parent = $tracer->startSpan("parent");
+        $this->assertTrue(strlen($parent->traceGUID()) > 0);
+        $this->assertTrue(strlen($parent->guid()) > 0);
+
+        $child = $tracer->startSpan("child");
+        $child->setParent($parent);
+        $this->assertEquals($child->traceGUID(), $parent->traceGUID());
+        $this->assertEquals($child->getParentGUID(), $parent->guid());
+
+        $child->finish();
+        $parent->finish();
+    }
+
     public function testSpanThriftRecord() {
         $tracer = LightStep::newTracer("test_group", "1234567890");
         $span = $tracer->startSpan("hello/world");

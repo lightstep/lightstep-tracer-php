@@ -1,18 +1,3 @@
-# LightStep Instrumentation Library
-
-[![Circle CI](https://circleci.com/gh/lightstep/lightstep-tracer-php.svg?style=shield)](https://circleci.com/gh/lightstep/lightstep-tracer-php)
-
-## Install with Composer
-
-```bash
-composer require lightstep/tracer
-```
-
-The `lightstep/tracer` package is [available here on packagist.org](https://packagist.org/packages/lightstep/tracer).
-
-## Instrumentation Example
-
-```php
 <?php
 
 require __DIR__ . '/vendor/autoload.php';
@@ -31,10 +16,3 @@ for ($i = 0; $i < 10; $i++) {
     usleep(1e5);
 }
 $span->finish();
-```
-
-See `lib/api.php` for detailed API documentation.
-
-## License
-
-[The MIT License](LICENSE).
