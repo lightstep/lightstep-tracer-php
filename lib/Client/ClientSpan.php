@@ -106,6 +106,7 @@ class ClientSpan implements \LightStepBase\Span {
             }
         }
 
+        $this->_traceGUID = $span->_traceGUID;
         $this->setTag("parent_span_guid", $span->guid());
         return $this;
     }
