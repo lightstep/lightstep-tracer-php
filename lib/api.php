@@ -53,7 +53,7 @@ interface Tracer {
      * @param  string $format the OpenTracing constant for the format of $carrier
      * @param  mixed $carrier the carrier object; the type depends on the $format
      */
-    public function inject($span, $format, &$carrier);
+    public function inject(Span $span, $format, &$carrier);
 
     /**
      * Creates a new span data from the given carrier object.
@@ -95,6 +95,13 @@ interface Tracer {
      * no-ops when in disabled mode.
      */
     public function disable();
+
+    /**
+     * Sets a list of options onto this trace
+     *
+     * @param array $options
+     */
+    public function options($options);
 }
 
 /**
@@ -148,7 +155,6 @@ interface Span {
      * Gets a baggage item on the span.
      *
      * @param string key the key of the baggage item
-     * @param string value the value of the baggage item
      */
     public function getBaggageItem($key);
 
@@ -185,6 +191,20 @@ interface Span {
     public function guid();
 
     /**
+     * Returns the unique identifier for the trace of which this span is a part.
+     *
+     * @return string
+     */
+    public function traceGUID();
+
+    /**
+     * Sets the GUID of the containing trace onto this span.
+     *
+     * @param string $traceGUID
+     */
+    public function setTraceGUID($traceGUID);
+
+    /**
      * Explicitly associates this span as a child operation of the
      * given parent operation. This provides the instrumentation with
      * additional information to construct the trace.
@@ -192,6 +212,22 @@ interface Span {
      * @param Span $span the parent span of this span
      */
     public function setParent($span);
+
+    /**
+     * Explicitly associates this span as a child operation of the
+     * span identified by the given GUID. This provides the
+     * instrumentation with additional information to construct the
+     * trace.
+     * @param string $parentGUID
+     */
+    public function setParentGUID($parentGUID);
+
+    /**
+     * Fetches all baggage for this span.
+     *
+     * @return array
+     */
+    public function getBaggage();
 
     /**
      * Creates a printf-style log statement that will be associated with
