@@ -1,5 +1,5 @@
 {
-    "name": "lightstep/tracer",
+    "name": "life360/lightstep-tracer-php",
     "description": "LightStep instrumentation API",
     "license": "MIT",
     "require": {
