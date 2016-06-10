@@ -1,6 +1,8 @@
 <?php
 namespace LightStepBase\Client;
 
+use LightStepBase\Span;
+
 require_once(dirname(__FILE__) . "/../api.php");
 require_once(dirname(__FILE__) . "/ClientSpan.php");
 require_once(dirname(__FILE__) . "/NoOpSpan.php");
@@ -239,14 +241,14 @@ class ClientTracer implements \LightStepBase\Tracer {
     /**
      * Copies the span data into the given carrier object.
      */
-    public function inject($span, $format, &$carrier) {
+    public function inject(Span $span, $format, &$carrier) {
         switch ($format) {
         case LIGHTSTEP_FORMAT_TEXT_MAP:
             $this->injectToArray($span, $carrier);
             break;
 
         case LIGHTSTEP_FORMAT_BINARY:
-            throw new Exception('FORMAT_BINARY not yet implemented');
+            throw new \Exception('FORMAT_BINARY not yet implemented');
             break;
 
         default:
@@ -255,7 +257,7 @@ class ClientTracer implements \LightStepBase\Tracer {
         }
     }
 
-    protected function injectToArray($span, &$carrier) {
+    protected function injectToArray(Span $span, &$carrier) {
         $carrier[CARRIER_TRACER_STATE_PREFIX . 'spanid'] = $span->guid();
         $traceGUID = $span->traceGUID();
         if ($traceGUID) {
@@ -282,7 +284,7 @@ class ClientTracer implements \LightStepBase\Tracer {
             break;
 
         case LIGHTSTEP_FORMAT_BINARY:
-            throw new Exception('FORMAT_BINARY not yet implemented');
+            throw new \Exception('FORMAT_BINARY not yet implemented');
             break;
 
         default:
@@ -292,7 +294,7 @@ class ClientTracer implements \LightStepBase\Tracer {
         return $span;
     }
 
-    protected function joinFromArray($span, $carrier) {
+    protected function joinFromArray(Span $span, $carrier) {
         foreach ($carrier as $rawKey => $value) {
             $key = strtolower($rawKey);
             if ($this->_startsWith($key, CARRIER_TRACER_STATE_PREFIX)) {

@@ -1,13 +1,13 @@
 <?php
 
-class SpanTest extends PHPUnit_Framework_TestCase {
+class SpanTest extends BaseLightStepTest {
 
     public function testSpanSetOperation() {
         $tracer = LightStep::newTracer("test_group", "1234567890");
         $span = $tracer->startSpan("server/query");
         $span->finish();
 
-        $this->assertEquals(peek($span, "_operation"), "server/query");
+        $this->assertEquals($this->peek($span, "_operation"), "server/query");
     }
 
     public function testSpanStartEndMicros() {
@@ -19,8 +19,8 @@ class SpanTest extends PHPUnit_Framework_TestCase {
             usleep(500);
             $span->finish();
 
-            $start = peek($span, "_startMicros");
-            $end = peek($span, "_endMicros");
+            $start = $this->peek($span, "_startMicros");
+            $end = $this->peek($span, "_endMicros");
             $delta = $end - $start;
             $sum += $delta;
 
@@ -39,10 +39,10 @@ class SpanTest extends PHPUnit_Framework_TestCase {
         $span = $tracer->startSpan("join_id_span");
 
         $span->addTraceJoinId("number", "one");
-        $this->assertEquals(count(peek($span, "_joinIds")), 1);
+        $this->assertEquals(count($this->peek($span, "_joinIds")), 1);
 
         $span->setEndUserId("mr_jones");
-        $this->assertEquals(count(peek($span, "_joinIds")), 2);
+        $this->assertEquals(count($this->peek($span, "_joinIds")), 2);
     }
 
     public function testSpanLogging() {
@@ -60,11 +60,11 @@ class SpanTest extends PHPUnit_Framework_TestCase {
         $span->setTag("test_attribute_1", "value 1");
         $span->setTag("test_attribute_2", "value 2");
 
-        $this->assertEquals(count(peek($span, "_tags")), 2);
+        $this->assertEquals(count($this->peek($span, "_tags")), 2);
 
         $span->setTag("test_attribute_3", "value 3");
 
-        $this->assertEquals(count(peek($span, "_tags")), 3);
+        $this->assertEquals(count($this->peek($span, "_tags")), 3);
 
         $span->finish();
     }

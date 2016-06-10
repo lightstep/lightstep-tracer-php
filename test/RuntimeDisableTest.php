@@ -1,6 +1,6 @@
 <?php
 
-class RuntimeDisableTest extends PHPUnit_Framework_TestCase {
+class RuntimeDisableTest extends BaseLightStepTest {
 
     public function testDisable() {
         $runtime = LightStep::newTracer("test_group", "1234567890");

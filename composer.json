@@ -6,7 +6,8 @@
         "ruafozy/mersenne-twister": "^1.3"
     },
     "require-dev": {
-        "phpdocumentor/phpdocumentor": "^2.8.5"
+        "phpdocumentor/phpdocumentor": "^2.8.5",
+        "phpunit/phpunit": "~4.8.20"
     },
     "autoload": {
         "files": [
