@@ -97,7 +97,7 @@ interface Tracer {
     public function disable();
 
     /**
-     * Sets a list of options onto this trace
+     * Currently for internal use only.
      *
      * @param array $options
      */
