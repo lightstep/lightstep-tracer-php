@@ -1,11 +1,6 @@
 <?php
 
-// Helper to grab protected fields -- useful for the unit tests!
-function peek($obj, $field) {
-    return PHPUnit_Framework_Assert::readAttribute($obj, $field);
-}
-
-class LightStepTest extends PHPUnit_Framework_TestCase {
+class LightStepTest extends BaseLightStepTest {
 
     public function testGetInstance() {
         $inst = LightStep::getInstance("test_group", "1234567890");

@@ -1,6 +1,6 @@
 <?php
 
-class InitializationTest extends PHPUnit_Framework_TestCase {
+class InitializationTest extends BaseLightStepTest {
 
     /*
         If data collection is started before the runtime is configuration is
@@ -28,8 +28,8 @@ class InitializationTest extends PHPUnit_Framework_TestCase {
         $runtime = LightStep::newTracer(NULL, NULL);
         $span = $runtime->startSpan("test_span");
 
-        $this->assertGreaterThan(0, peek($runtime, "_options")['max_log_records']);
-        $this->assertGreaterThan(0, peek($runtime, "_options")['max_span_records']);
+        $this->assertGreaterThan(0, $this->peek($runtime, "_options")['max_log_records']);
+        $this->assertGreaterThan(0, $this->peek($runtime, "_options")['max_span_records']);
 
         for ($i = 0; $i < 100; $i++) {
             $span->infof("log%03d", 3 * $i);
@@ -62,7 +62,7 @@ class InitializationTest extends PHPUnit_Framework_TestCase {
         $span->finish();
 
 
-        $this->assertEquals(2, count(peek($runtime, "_spanRecords")));
+        $this->assertEquals(2, count($this->peek($runtime, "_spanRecords")));
         $runtime->flush();
     }
 }

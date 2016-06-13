@@ -9,7 +9,7 @@ class TestClass001 {
     }
 }
 
-class PayloadsTest extends PHPUnit_Framework_TestCase {
+class PayloadsTest extends BaseLightStepTest {
 
     public function testDataTypes() {
         $runtime = LightStep::newTracer("test_group", "1234567890");
