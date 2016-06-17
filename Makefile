@@ -8,7 +8,7 @@ install_dependencies:
 
 .PHONY: test
 test:
-	phpunit --bootstrap vendor/autoload.php test
+	vendor/bin/phpunit
 
 .PHONY: docs
 docs:
