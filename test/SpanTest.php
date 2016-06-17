@@ -117,9 +117,9 @@ class SpanTest extends BaseLightStepTest {
         $this->assertTrue(is_string($arr["span_name"]));
         $this->assertEquals(1, count($arr["join_ids"]));
         $this->assertTrue(is_string($arr["join_ids"][0]["TraceKey"]));
-	$this->assertTrue(is_string($arr["join_ids"][0]["Value"]));
-	$this->assertTrue(is_string($arr["attributes"][0]["Key"]));
-	$this->assertTrue(is_string($arr["attributes"][0]["Value"]));
+        $this->assertTrue(is_string($arr["join_ids"][0]["Value"]));
+        $this->assertTrue(is_string($arr["attributes"][0]["Key"]));
+        $this->assertTrue(is_string($arr["attributes"][0]["Value"]));
     }
 
     public function testInjectJoin() {
