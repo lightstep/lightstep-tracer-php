@@ -3,3 +3,4 @@ intermediate/
 
 # Ignore only the top-level vendor directory
 /vendor/
+/tmp/

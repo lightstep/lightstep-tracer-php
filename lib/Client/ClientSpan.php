@@ -189,15 +189,25 @@ class ClientSpan implements \LightStepBase\Span {
             array_push($joinIds, $pair);
         }
 
+        $tags = array();
+        foreach ($this->_tags as $key => $value) {
+            $pair = new \CroutonThrift\KeyValue([
+                "Key"      => strval($key),
+                "Value"    => strval($value),
+            ]);
+            array_push($tags, $pair);
+        }
+
         $rec = new \CroutonThrift\SpanRecord(array(
-            "runtime_guid" => strval($this->_tracer->guid()),
-            "span_guid" => strval($this->_guid),
-            "trace_guid" => strval($this->_traceGUID),
-            "span_name" => strval($this->_operation),
-            "oldest_micros" => intval($this->_startMicros),
+            "runtime_guid"    => strval($this->_tracer->guid()),
+            "span_guid"       => strval($this->_guid),
+            "trace_guid"      => strval($this->_traceGUID),
+            "span_name"       => strval($this->_operation),
+            "oldest_micros"   => intval($this->_startMicros),
             "youngest_micros" => intval($this->_endMicros),
-            "join_ids" => $joinIds,
-            "error_flag" => $this->_errorFlag,
+            "join_ids"        => $joinIds,
+            "error_flag"      => $this->_errorFlag,
+            "attributes"      => $tags,
         ));
         return $rec;
     }

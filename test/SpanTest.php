@@ -106,7 +106,8 @@ class SpanTest extends BaseLightStepTest {
         $tracer = LightStep::newTracer("test_group", "1234567890");
         $span = $tracer->startSpan("hello/world");
         $span->setEnduserId("dinosaur_sr");
-        $span->finish();
+        $span->setTag("Titanosaurus", "sauropod");
+        $span->finish();      
 
         // Transform the object into a associative array
         $arr = json_decode(json_encode($span->toThrift()), TRUE);
@@ -117,6 +118,8 @@ class SpanTest extends BaseLightStepTest {
         $this->assertEquals(1, count($arr["join_ids"]));
         $this->assertTrue(is_string($arr["join_ids"][0]["TraceKey"]));
         $this->assertTrue(is_string($arr["join_ids"][0]["Value"]));
+        $this->assertTrue(is_string($arr["attributes"][0]["Key"]));
+        $this->assertTrue(is_string($arr["attributes"][0]["Value"]));
     }
 
     public function testInjectJoin() {
