@@ -105,9 +105,9 @@ class SpanTest extends BaseLightStepTest {
     public function testSpanThriftRecord() {
         $tracer = LightStep::newTracer("test_group", "1234567890");
         $span = $tracer->startSpan("hello/world");
-	$span->setEnduserId("dinosaur_sr");
-	$span->setTag("Titanosaurus", "sauropod");
-        $span->finish();
+        $span->setEnduserId("dinosaur_sr");
+        $span->setTag("Titanosaurus", "sauropod");
+        $span->finish();      
 
         // Transform the object into a associative array
         $arr = json_decode(json_encode($span->toThrift()), TRUE);
