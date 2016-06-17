@@ -1,6 +1,10 @@
 # LightStep Instrumentation Library
 
+
+
+[![Latest Stable Version](https://poser.pugx.org/lightstep/tracer/v/stable)](https://packagist.org/packages/lightstep/tracer)
 [![Circle CI](https://circleci.com/gh/lightstep/lightstep-tracer-php.svg?style=shield)](https://circleci.com/gh/lightstep/lightstep-tracer-php)
+[![MIT license](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
 ## Install with Composer
 
