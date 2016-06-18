@@ -20,7 +20,7 @@ define('CARRIER_BAGGAGE_PREFIX', 'ot-baggage-');
 class ClientTracer implements \LightStepBase\Tracer {
 
     protected $_util = null;
-    protected $_options = array();
+    protected $_options = [];
     protected $_enabled = true;
     protected $_debug = false;
 
@@ -31,21 +31,21 @@ class ClientTracer implements \LightStepBase\Tracer {
     protected $_transport = null;
 
     protected $_reportStartTime = 0;
-    protected $_logRecords = array();
-    protected $_spanRecords = array();
-    protected $_counters = array(
+    protected $_logRecords = [];
+    protected $_spanRecords = [];
+    protected $_counters = [
         'dropped_logs' => 0,
         'dropped_counters' => 0,
-    );
+    ];
 
     protected $_lastFlushMicros = 0;
     protected $_minFlushPeriodMicros = 0;
     protected $_maxFlushPeriodMicros = 0;
 
-    public function __construct($options = array()) {
+    public function __construct($options = []) {
         $this->_util = new Util();
 
-        $defaults = array(
+        $defaults = [
             'collector_host'            => 'collector.lightstep.com',
             'collector_port'            => 80,
             'collector_secure'          => false,
@@ -69,7 +69,7 @@ class ClientTracer implements \LightStepBase\Tracer {
 
             // Flag intended solely to unit testing convenience
             'debug_disable_flush'   => false,
-        );
+        ];
 
         // Modify some of the interdependent defaults based on what the user-specified
         if (isset($options['collector_secure'])) {
@@ -168,32 +168,32 @@ class ClientTracer implements \LightStepBase\Tracer {
         }
 
         // Tracer attributes
-        $runtimeAttrs = array(
+        $runtimeAttrs = [
             'lightstep_tracer_platform' => 'php',
             'lightstep_tracer_version'  => LIGHTSTEP_VERSION,
             'php_version' => phpversion(),
-        );
+        ];
 
         // Generate the GUID on thrift initialization as the GUID should be
         // stable for a particular access token / component name combo.
         $this->_guid = $this->_generateStableUUID($accessToken, $componentName);
-        $this->_thriftAuth = new \CroutonThrift\Auth(array(
+        $this->_thriftAuth = new \CroutonThrift\Auth([
             'access_token' => strval($accessToken),
-        ));
+        ]);
 
-        $thriftAttrs = array();
+        $thriftAttrs = [];
         foreach ($runtimeAttrs as $key => $value) {
-            array_push($thriftAttrs, new \CroutonThrift\KeyValue(array(
+            array_push($thriftAttrs, new \CroutonThrift\KeyValue([
                 'Key' => strval($key),
                 'Value' => strval($value),
-            )));
+            ]));
         }
-        $this->_thriftRuntime = new \CroutonThrift\Runtime(array(
+        $this->_thriftRuntime = new \CroutonThrift\Runtime([
             'guid' => strval($this->_guid),
             'start_micros' => intval($this->_startTime),
             'group_name' => strval($componentName),
             'attrs' => $thriftAttrs,
-        ));
+        ]);
     }
 
     public function guid() {
@@ -211,8 +211,8 @@ class ClientTracer implements \LightStepBase\Tracer {
      * Discard all currently buffered data.  Useful for unit testing.
      */
     public function _discard() {
-        $this->_logRecords = array();
-        $this->_spanRecords = array();
+        $this->_logRecords = [];
+        $this->_spanRecords = [];
     }
 
     public function startSpan($operationName, $fields = NULL) {
@@ -391,21 +391,21 @@ class ClientTracer implements \LightStepBase\Tracer {
         }
 
         // Convert the counters to thrift form
-        $thriftCounters = array();
+        $thriftCounters = [];
         foreach ($this->_counters as $key => $value) {
-            array_push($thriftCounters, new \CroutonThrift\NamedCounter(array(
+            $thriftCounters[] = new \CroutonThrift\NamedCounter([
                 'Name' => strval($key),
                 'Value' => intval($value),
-            )));
+            ]);
         }
-        $reportRequest = new \CroutonThrift\ReportRequest(array(
+        $reportRequest = new \CroutonThrift\ReportRequest([
             'runtime'         => $this->_thriftRuntime,
             'oldest_micros'   => intval($this->_reportStartTime),
             'youngest_micros' => intval($now),
             'log_records'     => $this->_logRecords,
             'span_records'    => $this->_spanRecords,
             'counters'        => $thriftCounters,
-        ));
+        ]);
 
         $this->_lastFlushMicros = $now;
 
@@ -424,8 +424,8 @@ class ClientTracer implements \LightStepBase\Tracer {
         // ALWAYS reset the buffers and update the counters as the RPC response
         // is, by design, not waited for and not reliable.
         $this->_reportStartTime = $now;
-        $this->_logRecords = array();
-        $this->_spanRecords = array();
+        $this->_logRecords = [];
+        $this->_spanRecords = [];
         foreach ($this->_counters as &$value) {
             $value = 0;
         }
@@ -501,10 +501,10 @@ class ClientTracer implements \LightStepBase\Tracer {
         array_shift($allArgs);
         $text = vsprintf($fmt, $allArgs);
 
-        $this->_rawLogRecord(array(
+        $this->_rawLogRecord([
             'level' => $level,
             'message' => $text,
-        ), $allArgs);
+        ], $allArgs);
 
         $this->flushIfNeeded();
         return $text;
@@ -551,7 +551,7 @@ class ClientTracer implements \LightStepBase\Tracer {
             $max = 1;
         }
 
-        array_push($arr, $item);
+        $arr[] =  $item;
 
         // Simplistic random discard
         $count = count($arr);

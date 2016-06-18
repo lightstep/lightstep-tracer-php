@@ -36,12 +36,12 @@ class LightStep {
         // as an options() call instead.
         if (isset(self::$_singleton)) {
             if (!isset($opts)) {
-                $opts = array();
+                $opts = [];
             }
-            self::$_singleton->options(array_merge($opts, array(
+            self::$_singleton->options(array_merge($opts, [
                 'component_name' => $component_name,
                 'access_token' => $access_token,
-            )));
+            ]));
         } else {
             self::$_singleton = self::newTracer($component_name, $access_token, $opts);
         }
@@ -78,7 +78,7 @@ class LightStep {
      */
     public static function newTracer ($component_name, $access_token, $opts = NULL) {
         if (is_null($opts)) {
-            $opts = array();
+            $opts = [];
         }
 
         // It is valid to create and use the tracer before it is fully configured.
