@@ -115,7 +115,7 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         // Deferred group name / access token initialization is supported (i.e.
         // it is possible to create logs/spans before setting this info).
-        if (isset($options['access_token']) && isset($options['component_name'])) {
+        if (!empty($options['access_token']) && !empty($options['component_name'])) {
             $this->_initThriftDataIfNeeded($options['component_name'], $options['access_token']);
         }
 
@@ -520,12 +520,12 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         $fields['runtime_guid'] = strval($this->_guid);
 
-        if (!isset($fields['timestamp_micros'])) {
+        if (empty($fields['timestamp_micros'])) {
             $fields['timestamp_micros'] = intval($this->_util->nowMicros());
         }
 
         // TODO: data scrubbing and size limiting
-        if ($payloadArray != NULL && count($payloadArray) > 0) {
+        if (!empty($payloadArray)) {
             // $json == FALSE on failure
             //
             // Examples that will cause failure:

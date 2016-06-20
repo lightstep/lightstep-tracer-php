@@ -132,12 +132,13 @@ class ClientSpan implements \LightStepBase\Span {
         ];
         $payload = NULL;
 
-        if (isset($fields['event'])) {
+        if (!empty($fields['event'])) {
             $record['stable_name'] = strval($fields['event']);
         }
-        if (isset($fields['timestamp'])) {
+        if (!empty($fields['timestamp'])) {
             $record['timestamp_micros'] = intval(1000 * $fields['timestamp']);
         }
+        // no need to verify value of fields['payload'] as it will be checked by _rawLogRecord
         $this->_tracer->_rawLogRecord($record, $fields['payload']);
     }
 
