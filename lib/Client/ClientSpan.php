@@ -11,13 +11,13 @@ class ClientSpan implements \LightStepBase\Span {
     protected $_guid = "";
     protected $_traceGUID = "";
     protected $_operation = "";
-    protected $_tags = array();
-    protected $_baggage = array();
+    protected $_tags = [];
+    protected $_baggage = [];
     protected $_startMicros = 0;
     protected $_endMicros = 0;
     protected $_errorFlag = false;
 
-    protected $_joinIds = array();
+    protected $_joinIds = [];
 
     public function __construct($tracer) {
         $this->_tracer = $tracer;
@@ -121,23 +121,24 @@ class ClientSpan implements \LightStepBase\Span {
     }
 
     public function logEvent($event, $payload = NULL) {
-        $this->log(array(
+        $this->log([
             'event' => strval($event),
             'payload' => $payload,
-        ));
+        ]);
     }
     public function log($fields) {
-        $record = array(
+        $record = [
             'span_guid' => strval($this->_guid),
-        );
+        ];
         $payload = NULL;
 
-        if (isset($fields['event'])) {
+        if (!empty($fields['event'])) {
             $record['stable_name'] = strval($fields['event']);
         }
-        if (isset($fields['timestamp'])) {
+        if (!empty($fields['timestamp'])) {
             $record['timestamp_micros'] = intval(1000 * $fields['timestamp']);
         }
+        // no need to verify value of fields['payload'] as it will be checked by _rawLogRecord
         $this->_tracer->_rawLogRecord($record, $fields['payload']);
     }
 
@@ -168,37 +169,37 @@ class ClientSpan implements \LightStepBase\Span {
         array_shift($allArgs);
         $text = vsprintf($fmt, $allArgs);
 
-        $this->_tracer->_rawLogRecord(array(
+        $this->_tracer->_rawLogRecord([
             'span_guid' => strval($this->_guid),
             'level' => $level,
             'error_flag' => $errorFlag,
             'message' => $text,
-        ), $allArgs);
+        ], $allArgs);
         return $text;
     }
 
     public function toThrift() {
         // Coerce all the types to strings to ensure there are no encoding/decoding
         // issues
-        $joinIds = array();
+        $joinIds = [];
         foreach ($this->_joinIds as $key => $value) {
-            $pair = new \CroutonThrift\TraceJoinId(array(
+            $pair = new \CroutonThrift\TraceJoinId([
                 "TraceKey" => strval($key),
                 "Value"    => strval($value),
-            ));
-            array_push($joinIds, $pair);
+            ]);
+            $joinIds[] = $pair;
         }
 
-        $tags = array();
+        $tags = [];
         foreach ($this->_tags as $key => $value) {
             $pair = new \CroutonThrift\KeyValue([
                 "Key"      => strval($key),
                 "Value"    => strval($value),
             ]);
-            array_push($tags, $pair);
+            $tags[] = $pair;
         }
 
-        $rec = new \CroutonThrift\SpanRecord(array(
+        $rec = new \CroutonThrift\SpanRecord([
             "runtime_guid"    => strval($this->_tracer->guid()),
             "span_guid"       => strval($this->_guid),
             "trace_guid"      => strval($this->_traceGUID),
@@ -208,7 +209,7 @@ class ClientSpan implements \LightStepBase\Span {
             "join_ids"        => $joinIds,
             "error_flag"      => $this->_errorFlag,
             "attributes"      => $tags,
-        ));
+        ]);
         return $rec;
     }
 }
