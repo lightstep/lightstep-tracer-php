@@ -4,6 +4,8 @@
 [![Circle CI](https://circleci.com/gh/lightstep/lightstep-tracer-php.svg?style=shield)](https://circleci.com/gh/lightstep/lightstep-tracer-php)
 [![MIT license](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
+The LightStep distributed tracing library for PHP.
+
 ## Installation
 
 ```bash
