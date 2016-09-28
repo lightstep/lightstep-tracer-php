@@ -4,7 +4,7 @@
 [![Circle CI](https://circleci.com/gh/lightstep/lightstep-tracer-php.svg?style=shield)](https://circleci.com/gh/lightstep/lightstep-tracer-php)
 [![MIT license](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
-## Install with Composer
+## Installation
 
 ```bash
 composer require lightstep/tracer
@@ -12,7 +12,7 @@ composer require lightstep/tracer
 
 The `lightstep/tracer` package is [available here on packagist.org](https://packagist.org/packages/lightstep/tracer).
 
-## Instrumentation Example
+## Getting started
 
 ```php
 <?php
