@@ -1,6 +1,4 @@
-# LightStep Instrumentation Library
-
-
+# lightstep-tracer-php
 
 [![Latest Stable Version](https://poser.pugx.org/lightstep/tracer/v/stable)](https://packagist.org/packages/lightstep/tracer)
 [![Circle CI](https://circleci.com/gh/lightstep/lightstep-tracer-php.svg?style=shield)](https://circleci.com/gh/lightstep/lightstep-tracer-php)
@@ -39,6 +37,3 @@ $span->finish();
 
 See `lib/api.php` for detailed API documentation.
 
-## License
-
-[The MIT License](LICENSE).
