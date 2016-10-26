@@ -27,8 +27,7 @@ inc_version:
 # Packagist looks for new tags in the git repo to find newly published
 # packages
 .PHONY: publish
-publish: pre-publish 
-	inc_version
+publish: pre-publish inc_version
 	git add .
 	git commit -m "Increment version to $(shell cat VERSION)"
 	git tag $(shell cat VERSION)
