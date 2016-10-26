@@ -169,9 +169,9 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         // Tracer attributes
         $runtimeAttrs = [
-            'lightstep_tracer_platform' => 'php',
-            'lightstep_tracer_version'  => LIGHTSTEP_VERSION,
-            'php_version' => phpversion(),
+            'lightstep.tracer_platform' => 'php',
+            'lightstep.tracer_platform_version' => phpversion(),
+            'lightstep.tracer_version'  => LIGHTSTEP_VERSION,
         ];
 
         // Generate the GUID on thrift initialization as the GUID should be
