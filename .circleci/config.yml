@@ -1,0 +1,25 @@
+version: 2
+
+jobs:
+  test:
+    docker:
+      - image: circleci/php:5-node-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - composer-cache-v1-{{ .Branch }}-{{ checksum "composer.lock" }}
+            - composer-cache-v1-{{ .Branch }}-
+            - composer-cache-v1-
+      - run: make install_dependencies
+      - run: make test
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: composer-cache-v1-{{ .Branch }}-{{ checksum "composer.lock" }}
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
