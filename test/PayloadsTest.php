@@ -113,11 +113,12 @@ class PayloadsTest extends BaseLightStepTest {
 
     protected function _wrapValue($value, $depth) {
         $key = "key_$depth";
-        if ($depth > 0) {
-            return $this->_wrapValue(array($key => $value), $depth - 1);
-        } else {
-            return $value;
+        $arr = array($key => $value);
+        for ($x = $depth-1; $x >= 0; $x--) {
+            $inner = $arr;
+            $arr = array("key_$x" => $inner);
         }
+        return $arr;
     }
 
     public function testDeeplyNested() {
