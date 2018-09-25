@@ -48,3 +48,10 @@ pre-publish: test
 .PHONY: thrift
 thrift:
 	thrift -r -gen php -out thrift $(LIGHTSTEP_HOME)/go/src/crouton/crouton.thrift
+
+# An internal LightStep target for regenerating the thrift protocol files
+.PHONY: proto
+proto:
+	protoc --proto_path "$(PWD)/../googleapis:$(PWD)/../lightstep-tracer-common/" \
+		--php_out="$(PWD)/lib/generated" \
+		collector.proto
