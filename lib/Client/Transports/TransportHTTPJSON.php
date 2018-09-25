@@ -27,16 +27,18 @@ class TransportHTTPJSON {
             return null;
         }
 
+        $thriftReport = $report->toThrift();
+
         if ($this->_verbose >= 3) {
-            var_dump($report);
+            var_dump($thriftReport);
         }
 
-        $content = json_encode($report);
+        $content = json_encode($thriftReport);
         $content = gzencode($content);
 
         $header = "Host: " . $this->_host . "\r\n";
         $header .= "User-Agent: LightStep-PHP\r\n";
-        $header .= "LightStep-Access-Token: " . $auth->access_token . "\r\n";
+        $header .= "LightStep-Access-Token: " . $auth->getAccessToken() . "\r\n";
         $header .= "Content-Type: application/json\r\n";
         $header .= "Content-Length: " . strlen($content) . "\r\n";
         $header .= "Content-Encoding: gzip\r\n";

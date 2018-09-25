@@ -10,6 +10,11 @@ require_once(dirname(__FILE__) . "/Util.php");
 require_once(dirname(__FILE__) . "/Transports/TransportUDP.php");
 require_once(dirname(__FILE__) . "/Transports/TransportHTTPJSON.php");
 require_once(dirname(__FILE__) . "/Version.php");
+require_once(dirname(__FILE__) . "/Auth.php");
+require_once(dirname(__FILE__) . "/Runtime.php");
+require_once(dirname(__FILE__) . "/KeyValue.php");
+require_once(dirname(__FILE__) . "/ReportRequest.php");
+require_once(dirname(__FILE__) . "/LogRecord.php");
 
 define('CARRIER_TRACER_STATE_PREFIX', 'ot-tracer-');
 define('CARRIER_BAGGAGE_PREFIX', 'ot-baggage-');
@@ -26,8 +31,8 @@ class ClientTracer implements \LightStepBase\Tracer {
 
     protected $_guid = "";
     protected $_startTime = 0;
-    protected $_thriftAuth = null;
-    protected $_thriftRuntime = null;
+    protected $_auth = null;
+    protected $_runtime = null;
     protected $_transport = null;
 
     protected $_reportStartTime = 0;
@@ -116,7 +121,7 @@ class ClientTracer implements \LightStepBase\Tracer {
         // Deferred group name / access token initialization is supported (i.e.
         // it is possible to create logs/spans before setting this info).
         if (!empty($options['access_token']) && !empty($options['component_name'])) {
-            $this->_initThriftDataIfNeeded($options['component_name'], $options['access_token']);
+            $this->_initDataIfNeeded($options['component_name'], $options['access_token']);
         }
 
         if (isset($options['min_reporting_period_secs'])) {
@@ -139,7 +144,7 @@ class ClientTracer implements \LightStepBase\Tracer {
         }
     }
 
-    private function _initThriftDataIfNeeded($componentName, $accessToken) {
+    private function _initDataIfNeeded($componentName, $accessToken) {
 
         // Pre-conditions
         if (!is_string($accessToken)) {
@@ -157,11 +162,11 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         // Potentially redundant initialization info: only complain if
         // it is inconsistent.
-        if ($this->_thriftAuth != NULL || $this->_thriftRuntime != NULL) {
-            if ($this->_thriftAuth->access_token !== $accessToken) {
+        if ($this->_auth != NULL || $this->_runtime != NULL) {
+            if ($this->_auth->getAccessToken() !== $accessToken) {
                 throw new \Exception('access_token cannot be changed after it is set');
             }
-            if ($this->_thriftRuntime->group_name !== $componentName) {
+            if ($this->_runtime->getGroupName() !== $componentName) {
                 throw new \Exception('component name cannot be changed after it is set');
             }
             return;
@@ -174,26 +179,16 @@ class ClientTracer implements \LightStepBase\Tracer {
             'lightstep.tracer_version'  => LIGHTSTEP_VERSION,
         ];
 
-        // Generate the GUID on thrift initialization as the GUID should be
+        // Generate the GUID on initialization as the GUID should be
         // stable for a particular access token / component name combo.
         $this->_guid = $this->_generateStableUUID($accessToken, $componentName);
-        $this->_thriftAuth = new \CroutonThrift\Auth([
-            'access_token' => strval($accessToken),
-        ]);
+        $this->_auth = new Auth($accessToken);
 
-        $thriftAttrs = [];
+        $attrs = [];
         foreach ($runtimeAttrs as $key => $value) {
-            array_push($thriftAttrs, new \CroutonThrift\KeyValue([
-                'Key' => strval($key),
-                'Value' => strval($value),
-            ]));
+            array_push($attrs, new KeyValue(strval($key), strval($value)));
         }
-        $this->_thriftRuntime = new \CroutonThrift\Runtime([
-            'guid' => strval($this->_guid),
-            'start_micros' => intval($this->_startTime),
-            'group_name' => strval($componentName),
-            'attrs' => $thriftAttrs,
-        ]);
+        $this->_runtime = new Runtime(strval($this->_guid), intval($this->_startTime), strval($componentName), $attrs);
     }
 
     public function guid() {
@@ -360,9 +355,9 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         $now = $this->_util->nowMicros();
 
-        // The thrift configuration has not yet been set: allow logs and spans
+        // The runtime configuration has not yet been set: allow logs and spans
         // to be buffered in this case, but flushes won't yet be possible.
-        if ($this->_thriftRuntime == NULL) {
+        if ($this->_runtime == NULL) {
             return;
         }
 
@@ -387,25 +382,10 @@ class ClientTracer implements \LightStepBase\Tracer {
             $log->runtime_guid = $this->_guid;
         }
         foreach ($this->_spanRecords as $span) {
-            $span->runtime_guid = $this->_guid;
+            $span->setRuntimeGUID($this->_guid);
         }
 
-        // Convert the counters to thrift form
-        $thriftCounters = [];
-        foreach ($this->_counters as $key => $value) {
-            $thriftCounters[] = new \CroutonThrift\NamedCounter([
-                'Name' => strval($key),
-                'Value' => intval($value),
-            ]);
-        }
-        $reportRequest = new \CroutonThrift\ReportRequest([
-            'runtime'         => $this->_thriftRuntime,
-            'oldest_micros'   => intval($this->_reportStartTime),
-            'youngest_micros' => intval($now),
-            'log_records'     => $this->_logRecords,
-            'span_records'    => $this->_spanRecords,
-            'counters'        => $thriftCounters,
-        ]);
+        $reportRequest = new ReportRequest($this->_runtime, intval($this->_reportStartTime), intval($now), $this->_logRecords, $this->_spanRecords, $this->_counters);
 
         $this->_lastFlushMicros = $now;
 
@@ -413,7 +393,7 @@ class ClientTracer implements \LightStepBase\Tracer {
         try {
             // It *is* valid for the transport to return a null response in the
             // case of a low-overhead "fire and forget" report
-            $resp = $this->_transport->flushReport($this->_thriftAuth, $reportRequest);
+            $resp = $this->_transport->flushReport($this->_auth, $reportRequest);
         } catch (\Exception $e) {
             // Exceptions *are* expected as connections can be broken, etc. when
             // reporting. Prevent reporting exceptions from interfering with the
@@ -482,7 +462,7 @@ class ClientTracer implements \LightStepBase\Tracer {
         }
 
         $span->setEndMicros($this->_util->nowMicros());
-        $full = $this->pushWithMax($this->_spanRecords, $span->toThrift(), $this->_options["max_span_records"]);
+        $full = $this->pushWithMax($this->_spanRecords, $span, $this->_options["max_span_records"]);
         if ($full) {
             if(!isset($this->_counters['dropped_spans'])) {
                 $this->_counters['dropped_spans'] = 0;
@@ -539,7 +519,7 @@ class ClientTracer implements \LightStepBase\Tracer {
             }
         }
 
-        $rec = new \CroutonThrift\LogRecord($fields);
+        $rec = new LogRecord($fields);
         $full = $this->pushWithMax($this->_logRecords, $rec, $this->_options['max_log_records']);
         if ($full) {
             $this->_counters['dropped_logs']++;
