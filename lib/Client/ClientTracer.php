@@ -9,6 +9,7 @@ require_once(dirname(__FILE__) . "/NoOpSpan.php");
 require_once(dirname(__FILE__) . "/Util.php");
 require_once(dirname(__FILE__) . "/Transports/TransportUDP.php");
 require_once(dirname(__FILE__) . "/Transports/TransportHTTPJSON.php");
+require_once(dirname(__FILE__) . "/Transports/TransportHTTPPROTO.php");
 require_once(dirname(__FILE__) . "/Version.php");
 require_once(dirname(__FILE__) . "/Auth.php");
 require_once(dirname(__FILE__) . "/Runtime.php");
@@ -90,6 +91,8 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         if ($this->_options['transport'] == 'udp') {
             $this->_transport = new Transports\TransportUDP();
+        } if ($this->_options['transport'] == 'http_proto') {
+            $this->_transport = new Transports\TransportHTTPPROTO();
         } else {
             $this->_transport = new Transports\TransportHTTPJSON();
         }
@@ -436,10 +439,7 @@ class ClientTracer implements \LightStepBase\Tracer {
      * Generates a random ID (not a RFC-4122 UUID).
      */
     public function _generateUUIDString() {
-        return sprintf("%08x%08x",
-            $this->_util->randInt32(),
-            $this->_util->randInt32()
-        );
+        return $this->_util->_generateUUIDString();
     }
 
     /**

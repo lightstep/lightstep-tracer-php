@@ -1,6 +1,13 @@
 <?php
 namespace LightStepBase\Client;
 
+use Lightstep\Collector\Reference;
+use Lightstep\Collector\Reference\Relationship;
+use Lightstep\Collector\Span;
+use Lightstep\Collector\SpanContext;
+use Google\Protobuf\Timestamp;
+use LightStepBase\Tracer;
+
 require_once(dirname(__FILE__) . "/Util.php");
 require_once(dirname(__FILE__) . "/../../thrift/CroutonThrift/Types.php");
 
@@ -126,7 +133,10 @@ class ClientSpan implements \LightStepBase\Span {
     }
 
     public function getParentGUID() {
-        return $this->_tags['parent_span_guid'];
+        if (array_key_exists('parent_span_guid', $this->_tags)) {
+            return $this->_tags['parent_span_guid'];
+        }
+        return NULL;
     }
 
     public function logEvent($event, $payload = NULL) {
@@ -259,5 +269,55 @@ class ClientSpan implements \LightStepBase\Span {
             "log_records"     => $thriftLogs,
         ]);
         return $rec;
+    }
+
+    /**
+     * @return Span A Proto representation of this object.
+     */
+    public function toProto() {
+        $spanContext = new SpanContext();
+        $spanContext->setTraceId(Util::hexdec($this->traceGUID()));
+        $spanContext->setSpanId(Util::hexdec($this->guid()));
+        $span = new Span();
+        $span->setSpanContext($spanContext);
+        $span->setOperationName(strval($this->_operation));
+
+        $ts = new Timestamp();
+
+        $ts->setSeconds(floor($this->_startMicros / 1000000));
+        $ts->setNanos($this->_startMicros % 1000000);
+        $span->setStartTimestamp($ts);
+
+        $span->setDurationMicros($this->_endMicros-$this->_startMicros);
+
+        $tags = [];
+        foreach ($this->_tags as $key => $value) {
+            if ($key == 'parent_span_guid') {
+                continue;
+            }
+            $protoTag = new \Lightstep\Collector\KeyValue();
+            $protoTag->setKey($key);
+            $protoTag->setStringValue($value);
+            $tags[] = $protoTag;
+        }
+        $span->setTags($tags);
+
+        $logs = [];
+        foreach ($this->_logRecords as $log) {
+            $logs[] = $log->toProto();
+        }
+        $span->setLogs($logs);
+
+        if ($this->getParentGUID() != NULL) {
+            $spanContext = new SpanContext();
+            $spanContext->setSpanId(Util::hexdec($this->getParentGUID()));
+
+            $ref = new Reference();
+            $ref->setSpanContext($spanContext);
+            $ref->setRelationship(Relationship::CHILD_OF);
+            $span->setReferences([$ref]);
+        }
+
+        return $span;
     }
 }
