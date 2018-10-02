@@ -41,7 +41,7 @@ class Runtime
     {
         $thriftAttrs = [];
         foreach ($this->_attrs as $attr) {
-            array_push($thriftAttrs, new \CroutonThrift\KeyValue($attr->GetKey(), $attr->GetValue()));
+            $thriftAttrs[] = new \CroutonThrift\KeyValue($attr->GetKey(), $attr->GetValue());
         }
         return new \CroutonThrift\Runtime([
             'guid' => $this->_guid,

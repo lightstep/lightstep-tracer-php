@@ -186,7 +186,7 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         $attrs = [];
         foreach ($runtimeAttrs as $key => $value) {
-            array_push($attrs, new KeyValue(strval($key), strval($value)));
+            $attrs[] = new KeyValue(strval($key), strval($value));
         }
         $this->_runtime = new Runtime(strval($this->_guid), intval($this->_startTime), strval($componentName), $attrs);
     }
