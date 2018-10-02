@@ -2,7 +2,7 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-LightStep::initGlobalTracer('examples/trivial_process', '61c90a839a46c996e79c56afa1f116b8');
+LightStep::initGlobalTracer('examples/trivial_process', '{your_access_token}');
 
 $span = LightStep::startSpan("trivial/loop");
 for ($i = 0; $i < 10; $i++) {

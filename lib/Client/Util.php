@@ -1,8 +1,6 @@
 <?php
 namespace LightStepBase\Client;
 
-use \mersenne_twister\twister;
-
 class Util {
 
     protected $_rng = null;

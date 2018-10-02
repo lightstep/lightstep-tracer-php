@@ -1,14 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: sarahhaskins
- * Date: 9/25/18
- * Time: 11:15 AM
- */
 
 namespace LightStepBase\Client;
 
 
+/**
+ * Class ReportRequest encapsulates all of the information required to make an RPC call to the LightStep satellite.
+ * @package LightStepBase\Client
+ */
 class ReportRequest
 {
     protected $_runtime = null;
@@ -18,6 +16,15 @@ class ReportRequest
     protected $_spanRecords = null;
     protected $_counters = null;
 
+    /**
+     * ReportRequest constructor.
+     * @param Runtime $runtime
+     * @param int $reportStartTime
+     * @param int $now
+     * @param array $logRecords
+     * @param array $spanRecords
+     * @param array $counters
+     */
     public function __construct($runtime, $reportStartTime, $now, $logRecords, $spanRecords, $counters) {
         $this->_runtime = $runtime;
         $this->_reportStartTime = $reportStartTime;
@@ -27,6 +34,9 @@ class ReportRequest
         $this->_counters = $counters;
     }
 
+    /**
+     * @return \CroutonThrift\ReportRequest A Thrift representation of this object.
+     */
     public function toThrift() {
         // Convert the counters to thrift form
         $thriftCounters = [];
@@ -58,5 +68,4 @@ class ReportRequest
             'counters'        => $thriftCounters,
         ]);
     }
-
 }
