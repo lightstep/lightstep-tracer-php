@@ -3,7 +3,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/php:5-apache-node-browsers
+      - image: circleci/php:5-node-browsers
     steps:
       - checkout
       - restore_cache:
@@ -11,6 +11,7 @@ jobs:
             - composer-cache-v1-{{ .Branch }}-{{ checksum "composer.lock" }}
             - composer-cache-v1-{{ .Branch }}-
             - composer-cache-v1-
+      - run: sudo docker-php-ext-install bcmath && sudo docker-php-ext-enable bcmath
       - run: make install_dependencies
       - run: make test
       - save_cache:
