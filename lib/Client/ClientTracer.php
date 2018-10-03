@@ -38,7 +38,6 @@ class ClientTracer implements \LightStepBase\Tracer {
     protected $_reportStartTime = 0;
     protected $_spanRecords = [];
     protected $_counters = [
-        'dropped_logs' => 0,
         'dropped_counters' => 0,
     ];
 
@@ -452,7 +451,7 @@ class ClientTracer implements \LightStepBase\Tracer {
         }
 
         $span->setEndMicros($this->_util->nowMicros());
-        $success = $this->_util->pushIfSpaceAllows(
+        $success = Util::pushIfSpaceAllows(
             $this->_spanRecords,
             $span,
             $this->_options["max_span_records"]);

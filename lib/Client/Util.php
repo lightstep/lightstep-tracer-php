@@ -41,7 +41,7 @@ class Util {
      * @param int $max Max number of items allowed in array, if provided max is <= 0, 1 will be used as the max
      * @return bool True if the item was successfully added to the array
      */
-    public function pushIfSpaceAllows(&$arr, $item, $max) {
+    public static function pushIfSpaceAllows(&$arr, $item, $max) {
         if ($max <= 0) {
             $max = 1;
         }
