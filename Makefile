@@ -48,3 +48,14 @@ pre-publish: test
 .PHONY: thrift
 thrift:
 	thrift -r -gen php -out thrift $(LIGHTSTEP_HOME)/go/src/crouton/crouton.thrift
+
+# An internal LightStep target for regenerating the protobuf files
+# In order to run this, it is assumed that you have the following projects cloned into the same
+# directly as this project:
+# https://github.com/lightstep/lightstep-tracer-common
+# https://github.com/googleapis/googleapis
+.PHONY: proto
+proto:
+	protoc --proto_path "$(PWD)/../googleapis:$(PWD)/../lightstep-tracer-common/" \
+		--php_out="$(PWD)/lib/generated" \
+		collector.proto

@@ -6,6 +6,7 @@ require_once(dirname(__FILE__) . "/../../thrift/CroutonThrift/Types.php");
 
 class NoOpSpan implements \LightStepBase\Span {
     public function guid() { return ""; }
+    public function setRuntimeGUID($guid) {}
     public function traceGUID() { return ""; }
     public function setTraceGUID($traceGUID) {}
 

@@ -39,3 +39,10 @@ $span->finish();
 
 See `lib/api.php` for detailed API documentation.
 
+## Developer Setup
+
+```
+brew install composer
+make install
+make test
+```

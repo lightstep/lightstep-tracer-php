@@ -16,6 +16,7 @@ class ClientSpan implements \LightStepBase\Span {
     protected $_startMicros = 0;
     protected $_endMicros = 0;
     protected $_errorFlag = false;
+    protected $_runtimeGUID = "";
 
     protected $_joinIds = [];
 
@@ -39,6 +40,10 @@ class ClientSpan implements \LightStepBase\Span {
 
     public function guid() {
         return $this->_guid;
+    }
+
+    public function setRuntimeGUID($guid) {
+        $this->_runtimeGUID = $guid;
     }
 
     public function traceGUID() {
@@ -200,7 +205,7 @@ class ClientSpan implements \LightStepBase\Span {
         }
 
         $rec = new \CroutonThrift\SpanRecord([
-            "runtime_guid"    => strval($this->_tracer->guid()),
+            "runtime_guid"    => strval($this->_runtimeGUID),
             "span_guid"       => strval($this->_guid),
             "trace_guid"      => strval($this->_traceGUID),
             "span_name"       => strval($this->_operation),

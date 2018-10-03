@@ -35,8 +35,8 @@ class TransportUDP {
         // from the "standard" RPC mechanism at the expense of some overhead in
         // creating intermediate Thrift data structures and JSON encoding.
         $data = array(
-            'auth' => $auth,
-            'report' => $report,
+            'auth' => $auth->toThrift(),
+            'report' => $report->toThrift(),
         );
 
         // Prefix with a header for versioning and routing purposes to future
