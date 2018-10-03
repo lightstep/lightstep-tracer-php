@@ -36,10 +36,8 @@ class ClientTracer implements \LightStepBase\Tracer {
     protected $_transport = null;
 
     protected $_reportStartTime = 0;
-    protected $_logRecords = [];
     protected $_spanRecords = [];
     protected $_counters = [
-        'dropped_logs' => 0,
         'dropped_counters' => 0,
     ];
 
@@ -206,7 +204,6 @@ class ClientTracer implements \LightStepBase\Tracer {
      * Discard all currently buffered data.  Useful for unit testing.
      */
     public function _discard() {
-        $this->_logRecords = [];
         $this->_spanRecords = [];
     }
 
@@ -215,7 +212,7 @@ class ClientTracer implements \LightStepBase\Tracer {
             return new NoOpSpan;
         }
 
-        $span = new ClientSpan($this);
+        $span = new ClientSpan($this, $this->_options['max_payload_depth']);
         $span->setOperationName($operationName);
         $span->setStartMicros($this->_util->nowMicros());
 
@@ -269,7 +266,7 @@ class ClientTracer implements \LightStepBase\Tracer {
      * Creates a new span data from the given carrier object.
      */
     public function join($operationName, $format, $carrier) {
-        $span = new ClientSpan($this);
+        $span = new ClientSpan($this, $this->_options['max_payload_depth']);
         $span->setOperationName($operationName);
         $span->setStartMicros($this->_util->nowMicros());
 
@@ -338,10 +335,6 @@ class ClientTracer implements \LightStepBase\Tracer {
         }
 
         // Look for a trigger that a flush is warranted
-        if (count($this->_logRecords) >= $this->_options["max_log_records"]) {
-            $this->flush();
-            return;
-        }
         if (count($this->_spanRecords) >= $this->_options["max_span_records"]) {
             $this->flush();
             return;
@@ -361,7 +354,7 @@ class ClientTracer implements \LightStepBase\Tracer {
             return;
         }
 
-        if (count($this->_logRecords) == 0 && count($this->_spanRecords) == 0) {
+        if (count($this->_spanRecords) == 0) {
             return;
         }
 
@@ -372,20 +365,17 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         $this->_transport->ensureConnection($this->_options);
 
-        // Ensure the log / span GUIDs are set correctly. This is covers a real
+        // Ensure the  span GUIDs are set correctly. This is covers a real
         // case: the runtime GUID cannot be generated until the access token
         // and group name are set (so that is the same GUID between script
-        // invocations), but the library allows logs and spans to be buffered
+        // invocations), but the library allows spans to be buffered
         // prior to setting those values.  Any such 'early buffered' spans need
         // to have the GUID set; for simplicity, the code resets them all.
-        foreach ($this->_logRecords as $log) {
-            $log->runtime_guid = $this->_guid;
-        }
         foreach ($this->_spanRecords as $span) {
             $span->setRuntimeGUID($this->_guid);
         }
 
-        $reportRequest = new ReportRequest($this->_runtime, intval($this->_reportStartTime), intval($now), $this->_logRecords, $this->_spanRecords, $this->_counters);
+        $reportRequest = new ReportRequest($this->_runtime, intval($this->_reportStartTime), intval($now), $this->_spanRecords, $this->_counters);
 
         $this->_lastFlushMicros = $now;
 
@@ -404,7 +394,6 @@ class ClientTracer implements \LightStepBase\Tracer {
         // ALWAYS reset the buffers and update the counters as the RPC response
         // is, by design, not waited for and not reliable.
         $this->_reportStartTime = $now;
-        $this->_logRecords = [];
         $this->_spanRecords = [];
         foreach ($this->_counters as &$value) {
             $value = 0;
@@ -462,8 +451,11 @@ class ClientTracer implements \LightStepBase\Tracer {
         }
 
         $span->setEndMicros($this->_util->nowMicros());
-        $full = $this->pushWithMax($this->_spanRecords, $span, $this->_options["max_span_records"]);
-        if ($full) {
+        $success = Util::pushIfSpaceAllows(
+            $this->_spanRecords,
+            $span,
+            $this->_options["max_span_records"]);
+        if (!$success) {
             if(!isset($this->_counters['dropped_spans'])) {
                 $this->_counters['dropped_spans'] = 0;
             }
@@ -471,77 +463,6 @@ class ClientTracer implements \LightStepBase\Tracer {
         }
 
         $this->flushIfNeeded();
-    }
-
-    /**
-     * For internal use only.
-     */
-    public function _log($level, $fmt, $allArgs) {
-        // The $allArgs variable contains the $fmt string
-        array_shift($allArgs);
-        $text = vsprintf($fmt, $allArgs);
-
-        $this->_rawLogRecord([
-            'level' => $level,
-            'message' => $text,
-        ], $allArgs);
-
-        $this->flushIfNeeded();
-        return $text;
-    }
-
-    /**
-     * Internal use only.
-     */
-    public function _rawLogRecord($fields, $payloadArray) {
-        if (!$this->_enabled) {
-            return;
-        }
-
-        $fields['runtime_guid'] = strval($this->_guid);
-
-        if (empty($fields['timestamp_micros'])) {
-            $fields['timestamp_micros'] = intval($this->_util->nowMicros());
-        }
-
-        // TODO: data scrubbing and size limiting
-        if (!empty($payloadArray)) {
-            // $json == FALSE on failure
-            //
-            // Examples that will cause failure:
-            // - "Resources" (e.g. file handles)
-            // - Circular references
-            // - Exceeding the max depth (i.e. it *does not* trim, it rejects)
-            //
-            $json = json_encode($payloadArray, 0, $this->_options['max_payload_depth']);
-            if (is_string($json)) {
-                $fields["payload_json"] = $json;
-            }
-        }
-
-        $rec = new LogRecord($fields);
-        $full = $this->pushWithMax($this->_logRecords, $rec, $this->_options['max_log_records']);
-        if ($full) {
-            $this->_counters['dropped_logs']++;
-        }
-    }
-
-    protected function pushWithMax(&$arr, $item, $max) {
-        if (!($max > 0)) {
-            $max = 1;
-        }
-
-        $arr[] =  $item;
-
-        // Simplistic random discard
-        $count = count($arr);
-        if ($count > $max) {
-            $i = $this->_util->randIntRange(0, $max - 1);
-            $arr[$i] = array_pop($arr);
-            return true;
-        } else {
-            return false;
-        }
     }
 
     protected function _debugRecordError($e) {
