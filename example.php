@@ -12,6 +12,7 @@ for ($i = 0; $i < 10; $i++) {
     $child = LightStep::startSpan("child_span", array(parent => $span));
     usleep(2e5);
     $child->logEvent("hello world");
+    $child->setTag("loop_iteration", $i);
     $child->finish();
     usleep(1e5);
 }

@@ -26,9 +26,27 @@ class Util {
         return $this->_rng->int32();
     }
 
-    public function nowMicros() {
+    public static function nowMicros() {
         // Note: microtime returns the current time *in seconds* but with
         // microsecond accuracy (not the current time in microseconds!).
         return floor(microtime(TRUE) * 1000.0 * 1000.0);
+    }
+
+    public function pushWithMax(&$arr, $item, $max) {
+        if (!($max > 0)) {
+            $max = 1;
+        }
+
+        $arr[] =  $item;
+
+        // Simplistic random discard
+        $count = count($arr);
+        if ($count > $max) {
+            $i = $this->randIntRange(0, $max - 1);
+            $arr[$i] = array_pop($arr);
+            return true;
+        } else {
+            return false;
+        }
     }
 }
