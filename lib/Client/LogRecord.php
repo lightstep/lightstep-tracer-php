@@ -51,20 +51,6 @@ class LogRecord
      * @return Log A Proto representation of this object.
      */
     public function toProto() {
-        $logTime = NULL;
-        if (array_key_exists('timestamp_micros', $this->_fields)) {
-            $logTime = $this->_fields['timestamp_micros'];
-        } else {
-            $logTime = intval($this->_util->nowMicros());
-        }
-
-        $protoTime = new Timestamp();
-        $protoTime->setSeconds(floor($logTime / 1000000));
-        $protoTime->setNanos($logTime % 1000000);
-
-        $protoLog = new Log();
-        $protoLog->setTimestamp($protoTime);
-
         $keyValues = [];
         foreach ($this->_fields as $key => $value) {
             if (!$key || !$value) {
@@ -73,14 +59,25 @@ class LogRecord
             if ($key == 'timestamp_micros') {
                 continue;
             }
-            $keyValue = new \Lightstep\Collector\KeyValue();
-            $keyValue->setKey($key);
-            $keyValue->setStringValue($value);
-            $keyValues[] = $keyValue;
+            $keyValues[] = new \Lightstep\Collector\KeyValue([
+                'key' => $key,
+                'string_value' => $value,
+            ]);
         };
 
-        $protoLog->setFields($keyValues);
+        $logTime = NULL;
+        if (array_key_exists('timestamp_micros', $this->_fields)) {
+            $logTime = $this->_fields['timestamp_micros'];
+        } else {
+            $logTime = intval($this->_util->nowMicros());
+        }
 
-        return $protoLog;
+        return new Log([
+            'timestamp' => new Timestamp([
+                'seconds' => floor($logTime / 1000000),
+                'nanos' => $logTime % 1000000,
+            ]),
+            'fields' => $keyValues,
+        ]);
     }
 }

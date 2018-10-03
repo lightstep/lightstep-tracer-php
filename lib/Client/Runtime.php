@@ -63,14 +63,14 @@ class Runtime
             $tag = $attr->toProto();
             $tags[] = $tag;
         }
-        $componentName = new KeyValue();
-        $componentName->setKey('lightstep.component_name');
-        $componentName->setStringValue($this->_group_name);
-        $tags[] = $componentName;
+        $tags[] = new KeyValue([
+            'key' => 'lightstep.component_name',
+            'string_value' => $this->_group_name,
+        ]);
 
-        $runtime = new Reporter();
-        $runtime->setTags($tags);
-        $runtime->setReporterId(Util::hexdec($this->_guid));
-        return $runtime;
+        return new Reporter([
+            'tags' => $tags,
+            'reporter_id' => Util::hexdec($this->_guid),
+        ]);
     }
 }

@@ -69,24 +69,24 @@ class ReportRequest
     public function toProto($auth) {
         $counts = [];
         foreach ($this->_counters as $key => $value) {
-            $count = new MetricsSample();
-            $count->setName(strval($key));
-            $count->setIntValue(intval($value));
-            $counts[] = $count;
+            $counts[] = new MetricsSample([
+                'name' => strval($key),
+                'int_value' => intval($value),
+            ]);
         }
-        $internalMetrics = new InternalMetrics();
-        $internalMetrics->setCounts($counts);
+        $internalMetrics = new InternalMetrics([
+            'counts' => $counts
+        ]);
 
         $spans = [];
         foreach ($this->_spanRecords as $sr) {
             $spans[] = $sr->toProto();
         }
-        $report = new ProtoReportRequest();
-        $report->setAuth($auth->toProto());
-        $report->setInternalMetrics($internalMetrics);
-        $report->setReporter($this->_runtime->toProto());
-        $report->setSpans($spans);
-
-        return $report;
+        return new ProtoReportRequest([
+            'auth' => $auth->toProto(),
+            'internal_metrics' => $internalMetrics,
+            'reporter' => $this->_runtime->toProto(),
+            'spans' => $spans,
+        ]);
     }
 }

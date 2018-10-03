@@ -66,6 +66,13 @@ class Util {
         return true;
     }
 
+    /**
+     * A php friendly solution for creating uint64 (as string) from hex.
+     * See: https://stackoverflow.com/questions/11867928/convert-64-bit-integer-hex-string-to-64-bit-decimal-string-on-32-bit-system/11919219
+     *
+     * @param string $input A hexadecimal string
+     * @return string A string containing the decimal value equivalent to the input.
+     */
     public static function hexdec($input) {
         $str_high = substr($input, 0, 8);
         $str_low = substr($input, 8, 8);
@@ -82,13 +89,17 @@ class Util {
         return $result;
     }
 
-    public static function dechex($dec) {
+    /**
+     * @param string $input A string containing a decimal value.
+     * @return string The hexadecimal string equivalent to the provided input.
+     */
+    public static function dechex($input) {
         $hex = '';
         do {
-            $last = bcmod($dec, 16);
+            $last = bcmod($input, 16);
             $hex = dechex($last).$hex;
-            $dec = bcdiv(bcsub($dec, $last), 16);
-        } while($dec>0);
+            $input = bcdiv(bcsub($input, $last), 16);
+        } while($input>0);
         return str_pad($hex, 16, "0", STR_PAD_LEFT);
     }
 }

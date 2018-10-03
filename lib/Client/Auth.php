@@ -42,8 +42,8 @@ class Auth
      * @return ProtoAuth A Proto representation of this object.
      */
     public function toProto() {
-        $protoAuth =  new ProtoAuth();
-        $protoAuth->setAccessToken($this->_accessToken);
-        return $protoAuth;
+        return new ProtoAuth([
+            'access_token' => $this->_accessToken
+        ]);
     }
 }

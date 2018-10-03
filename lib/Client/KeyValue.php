@@ -51,9 +51,9 @@ class KeyValue
      * @return \Lightstep\Collector\KeyValue A Proto representation of this object.
      */
     public function toProto() {
-        $kv = new \Lightstep\Collector\KeyValue();
-        $kv->setKey($this->_key);
-        $kv->setStringValue($this->_value);
-        return $kv;
+        return new \Lightstep\Collector\KeyValue([
+            'key' => $this->_key,
+            'string_value' => $this->_value,
+        ]);
     }
 }
