@@ -23,6 +23,22 @@ class LogRecord
      * @return \CroutonThrift\LogRecord A Thrift representation of this object.
      */
     public function toThrift() {
-        return new \CroutonThrift\LogRecord($this->_fields);
+        $ts = 0;
+        $fields = [];
+        foreach ($this->_fields as $key => $value) {
+            if ($key == 'timestamp_micros') {
+                $ts = $value;
+                continue;
+            }
+            $fields[] = new \CroutonThrift\KeyValue([
+                'Key' => $key,
+                'Value' => $value,
+            ]);
+        }
+
+        return new \CroutonThrift\LogRecord([
+            'fields' => $fields,
+            'timestamp_micros' => $ts
+        ]);
     }
 }

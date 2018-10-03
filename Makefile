@@ -47,7 +47,7 @@ pre-publish: test
 # An internal LightStep target for regenerating the thrift protocol files
 .PHONY: thrift
 thrift:
-	thrift -r -gen php -out thrift $(LIGHTSTEP_HOME)/go/src/crouton/crouton.thrift
+	thrift -r -gen php -out thrift $(LIGHTSTEP_REPO_ROOT)/go/src/github.com/lightstep/common-go/crouton.thrift
 
 # An internal LightStep target for regenerating the protobuf files
 # In order to run this, it is assumed that you have the following projects cloned into the same

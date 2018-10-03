@@ -19,11 +19,15 @@ class ClientSpan implements \LightStepBase\Span {
     protected $_runtimeGUID = "";
 
     protected $_joinIds = [];
+    protected $_logRecords = [];
 
-    public function __construct($tracer) {
+    protected $maxPayloadDepth = 0;
+
+    public function __construct($tracer, $maxPayloadDepth) {
         $this->_tracer = $tracer;
         $this->_traceGUID = $tracer->_generateUUIDString();
         $this->_guid = $tracer->_generateUUIDString();
+        $this->$maxPayloadDepth = $maxPayloadDepth;
     }
 
     public function __destruct() {
@@ -131,6 +135,7 @@ class ClientSpan implements \LightStepBase\Span {
             'payload' => $payload,
         ]);
     }
+
     public function log($fields) {
         $record = [
             'span_guid' => strval($this->_guid),
@@ -138,13 +143,14 @@ class ClientSpan implements \LightStepBase\Span {
         $payload = NULL;
 
         if (!empty($fields['event'])) {
-            $record['stable_name'] = strval($fields['event']);
+            $record['event'] = strval($fields['event']);
         }
+
         if (!empty($fields['timestamp'])) {
             $record['timestamp_micros'] = intval(1000 * $fields['timestamp']);
         }
         // no need to verify value of fields['payload'] as it will be checked by _rawLogRecord
-        $this->_tracer->_rawLogRecord($record, $fields['payload']);
+        $this->_rawLogRecord($record, $fields['payload']);
     }
 
     public function infof($fmt) {
@@ -174,13 +180,42 @@ class ClientSpan implements \LightStepBase\Span {
         array_shift($allArgs);
         $text = vsprintf($fmt, $allArgs);
 
-        $this->_tracer->_rawLogRecord([
+        $this->_rawLogRecord([
             'span_guid' => strval($this->_guid),
             'level' => $level,
             'error_flag' => $errorFlag,
             'message' => $text,
         ], $allArgs);
         return $text;
+    }
+
+    /**
+     * Internal use only.
+     */
+    public function _rawLogRecord($fields, $payloadArray) {
+        $fields['runtime_guid'] = strval($this->_guid);
+
+        if (empty($fields['timestamp_micros'])) {
+            $fields['timestamp_micros'] = intval(Util::nowMicros());
+        }
+
+        // TODO: data scrubbing and size limiting
+        if (!empty($payloadArray)) {
+            // $json == FALSE on failure
+            //
+            // Examples that will cause failure:
+            // - "Resources" (e.g. file handles)
+            // - Circular references
+            // - Exceeding the max depth (i.e. it *does not* trim, it rejects)
+            //
+            $json = json_encode($payloadArray, 0, $this->maxPayloadDepth);
+            if (is_string($json)) {
+                $fields["payload_json"] = $json;
+            }
+        }
+
+        $rec = new LogRecord($fields);
+        $this->_logRecords[] = $rec;
     }
 
     public function toThrift() {
@@ -204,6 +239,13 @@ class ClientSpan implements \LightStepBase\Span {
             $tags[] = $pair;
         }
 
+        // Convert the logs to thrift form
+        $thriftLogs = [];
+        foreach ($this->_logRecords as $lr) {
+            $lr->runtime_guid = $this->_runtimeGUID;
+            $thriftLogs[] = $lr->toThrift();
+        }
+
         $rec = new \CroutonThrift\SpanRecord([
             "runtime_guid"    => strval($this->_runtimeGUID),
             "span_guid"       => strval($this->_guid),
@@ -214,6 +256,7 @@ class ClientSpan implements \LightStepBase\Span {
             "join_ids"        => $joinIds,
             "error_flag"      => $this->_errorFlag,
             "attributes"      => $tags,
+            "log_records"     => $thriftLogs,
         ]);
         return $rec;
     }

@@ -393,6 +393,10 @@ class LogRecord {
    */
   public $timestamp_micros = null;
   /**
+   * @var \CroutonThrift\KeyValue[]
+   */
+  public $fields = null;
+  /**
    * @var string
    */
   public $runtime_guid = null;
@@ -443,6 +447,15 @@ class LogRecord {
         1 => array(
           'var' => 'timestamp_micros',
           'type' => TType::I64,
+          ),
+        13 => array(
+          'var' => 'fields',
+          'type' => TType::LST,
+          'etype' => TType::STRUCT,
+          'elem' => array(
+            'type' => TType::STRUCT,
+            'class' => '\CroutonThrift\KeyValue',
+            ),
           ),
         2 => array(
           'var' => 'runtime_guid',
@@ -497,6 +510,9 @@ class LogRecord {
     if (is_array($vals)) {
       if (isset($vals['timestamp_micros'])) {
         $this->timestamp_micros = $vals['timestamp_micros'];
+      }
+      if (isset($vals['fields'])) {
+        $this->fields = $vals['fields'];
       }
       if (isset($vals['runtime_guid'])) {
         $this->runtime_guid = $vals['runtime_guid'];
@@ -560,6 +576,24 @@ class LogRecord {
             $xfer += $input->skip($ftype);
           }
           break;
+        case 13:
+          if ($ftype == TType::LST) {
+            $this->fields = array();
+            $_size7 = 0;
+            $_etype10 = 0;
+            $xfer += $input->readListBegin($_etype10, $_size7);
+            for ($_i11 = 0; $_i11 < $_size7; ++$_i11)
+            {
+              $elem12 = null;
+              $elem12 = new \CroutonThrift\KeyValue();
+              $xfer += $elem12->read($input);
+              $this->fields []= $elem12;
+            }
+            $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
         case 2:
           if ($ftype == TType::STRING) {
             $xfer += $input->readString($this->runtime_guid);
@@ -619,14 +653,14 @@ class LogRecord {
         case 10:
           if ($ftype == TType::LST) {
             $this->stack_frames = array();
-            $_size7 = 0;
-            $_etype10 = 0;
-            $xfer += $input->readListBegin($_etype10, $_size7);
-            for ($_i11 = 0; $_i11 < $_size7; ++$_i11)
+            $_size13 = 0;
+            $_etype16 = 0;
+            $xfer += $input->readListBegin($_etype16, $_size13);
+            for ($_i17 = 0; $_i17 < $_size13; ++$_i17)
             {
-              $elem12 = null;
-              $xfer += $input->readString($elem12);
-              $this->stack_frames []= $elem12;
+              $elem18 = null;
+              $xfer += $input->readString($elem18);
+              $this->stack_frames []= $elem18;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -713,9 +747,9 @@ class LogRecord {
       {
         $output->writeListBegin(TType::STRING, count($this->stack_frames));
         {
-          foreach ($this->stack_frames as $iter13)
+          foreach ($this->stack_frames as $iter19)
           {
-            $xfer += $output->writeString($iter13);
+            $xfer += $output->writeString($iter19);
           }
         }
         $output->writeListEnd();
@@ -730,6 +764,23 @@ class LogRecord {
     if ($this->error_flag !== null) {
       $xfer += $output->writeFieldBegin('error_flag', TType::BOOL, 12);
       $xfer += $output->writeBool($this->error_flag);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->fields !== null) {
+      if (!is_array($this->fields)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('fields', TType::LST, 13);
+      {
+        $output->writeListBegin(TType::STRUCT, count($this->fields));
+        {
+          foreach ($this->fields as $iter20)
+          {
+            $xfer += $iter20->write($output);
+          }
+        }
+        $output->writeListEnd();
+      }
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
@@ -1025,15 +1076,15 @@ class SpanRecord {
         case 4:
           if ($ftype == TType::LST) {
             $this->join_ids = array();
-            $_size14 = 0;
-            $_etype17 = 0;
-            $xfer += $input->readListBegin($_etype17, $_size14);
-            for ($_i18 = 0; $_i18 < $_size14; ++$_i18)
+            $_size21 = 0;
+            $_etype24 = 0;
+            $xfer += $input->readListBegin($_etype24, $_size21);
+            for ($_i25 = 0; $_i25 < $_size21; ++$_i25)
             {
-              $elem19 = null;
-              $elem19 = new \CroutonThrift\TraceJoinId();
-              $xfer += $elem19->read($input);
-              $this->join_ids []= $elem19;
+              $elem26 = null;
+              $elem26 = new \CroutonThrift\TraceJoinId();
+              $xfer += $elem26->read($input);
+              $this->join_ids []= $elem26;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1057,15 +1108,15 @@ class SpanRecord {
         case 8:
           if ($ftype == TType::LST) {
             $this->attributes = array();
-            $_size20 = 0;
-            $_etype23 = 0;
-            $xfer += $input->readListBegin($_etype23, $_size20);
-            for ($_i24 = 0; $_i24 < $_size20; ++$_i24)
+            $_size27 = 0;
+            $_etype30 = 0;
+            $xfer += $input->readListBegin($_etype30, $_size27);
+            for ($_i31 = 0; $_i31 < $_size27; ++$_i31)
             {
-              $elem25 = null;
-              $elem25 = new \CroutonThrift\KeyValue();
-              $xfer += $elem25->read($input);
-              $this->attributes []= $elem25;
+              $elem32 = null;
+              $elem32 = new \CroutonThrift\KeyValue();
+              $xfer += $elem32->read($input);
+              $this->attributes []= $elem32;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1082,15 +1133,15 @@ class SpanRecord {
         case 10:
           if ($ftype == TType::LST) {
             $this->log_records = array();
-            $_size26 = 0;
-            $_etype29 = 0;
-            $xfer += $input->readListBegin($_etype29, $_size26);
-            for ($_i30 = 0; $_i30 < $_size26; ++$_i30)
+            $_size33 = 0;
+            $_etype36 = 0;
+            $xfer += $input->readListBegin($_etype36, $_size33);
+            for ($_i37 = 0; $_i37 < $_size33; ++$_i37)
             {
-              $elem31 = null;
-              $elem31 = new \CroutonThrift\LogRecord();
-              $xfer += $elem31->read($input);
-              $this->log_records []= $elem31;
+              $elem38 = null;
+              $elem38 = new \CroutonThrift\LogRecord();
+              $xfer += $elem38->read($input);
+              $this->log_records []= $elem38;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1133,9 +1184,9 @@ class SpanRecord {
       {
         $output->writeListBegin(TType::STRUCT, count($this->join_ids));
         {
-          foreach ($this->join_ids as $iter32)
+          foreach ($this->join_ids as $iter39)
           {
-            $xfer += $iter32->write($output);
+            $xfer += $iter39->write($output);
           }
         }
         $output->writeListEnd();
@@ -1160,9 +1211,9 @@ class SpanRecord {
       {
         $output->writeListBegin(TType::STRUCT, count($this->attributes));
         {
-          foreach ($this->attributes as $iter33)
+          foreach ($this->attributes as $iter40)
           {
-            $xfer += $iter33->write($output);
+            $xfer += $iter40->write($output);
           }
         }
         $output->writeListEnd();
@@ -1182,9 +1233,9 @@ class SpanRecord {
       {
         $output->writeListBegin(TType::STRUCT, count($this->log_records));
         {
-          foreach ($this->log_records as $iter34)
+          foreach ($this->log_records as $iter41)
           {
-            $xfer += $iter34->write($output);
+            $xfer += $iter41->write($output);
           }
         }
         $output->writeListEnd();
@@ -1497,6 +1548,281 @@ class SampleCount {
 
 }
 
+class MetricsSample {
+  static $_TSPEC;
+
+  /**
+   * @var string
+   */
+  public $name = null;
+  /**
+   * @var int
+   */
+  public $int64_value = null;
+  /**
+   * @var double
+   */
+  public $double_value = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        1 => array(
+          'var' => 'name',
+          'type' => TType::STRING,
+          ),
+        2 => array(
+          'var' => 'int64_value',
+          'type' => TType::I64,
+          ),
+        3 => array(
+          'var' => 'double_value',
+          'type' => TType::DOUBLE,
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['name'])) {
+        $this->name = $vals['name'];
+      }
+      if (isset($vals['int64_value'])) {
+        $this->int64_value = $vals['int64_value'];
+      }
+      if (isset($vals['double_value'])) {
+        $this->double_value = $vals['double_value'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'MetricsSample';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->name);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::I64) {
+            $xfer += $input->readI64($this->int64_value);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 3:
+          if ($ftype == TType::DOUBLE) {
+            $xfer += $input->readDouble($this->double_value);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('MetricsSample');
+    if ($this->name !== null) {
+      $xfer += $output->writeFieldBegin('name', TType::STRING, 1);
+      $xfer += $output->writeString($this->name);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->int64_value !== null) {
+      $xfer += $output->writeFieldBegin('int64_value', TType::I64, 2);
+      $xfer += $output->writeI64($this->int64_value);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->double_value !== null) {
+      $xfer += $output->writeFieldBegin('double_value', TType::DOUBLE, 3);
+      $xfer += $output->writeDouble($this->double_value);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class Metrics {
+  static $_TSPEC;
+
+  /**
+   * @var \CroutonThrift\MetricsSample[]
+   */
+  public $counts = null;
+  /**
+   * @var \CroutonThrift\MetricsSample[]
+   */
+  public $gauges = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        1 => array(
+          'var' => 'counts',
+          'type' => TType::LST,
+          'etype' => TType::STRUCT,
+          'elem' => array(
+            'type' => TType::STRUCT,
+            'class' => '\CroutonThrift\MetricsSample',
+            ),
+          ),
+        2 => array(
+          'var' => 'gauges',
+          'type' => TType::LST,
+          'etype' => TType::STRUCT,
+          'elem' => array(
+            'type' => TType::STRUCT,
+            'class' => '\CroutonThrift\MetricsSample',
+            ),
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['counts'])) {
+        $this->counts = $vals['counts'];
+      }
+      if (isset($vals['gauges'])) {
+        $this->gauges = $vals['gauges'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'Metrics';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::LST) {
+            $this->counts = array();
+            $_size42 = 0;
+            $_etype45 = 0;
+            $xfer += $input->readListBegin($_etype45, $_size42);
+            for ($_i46 = 0; $_i46 < $_size42; ++$_i46)
+            {
+              $elem47 = null;
+              $elem47 = new \CroutonThrift\MetricsSample();
+              $xfer += $elem47->read($input);
+              $this->counts []= $elem47;
+            }
+            $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::LST) {
+            $this->gauges = array();
+            $_size48 = 0;
+            $_etype51 = 0;
+            $xfer += $input->readListBegin($_etype51, $_size48);
+            for ($_i52 = 0; $_i52 < $_size48; ++$_i52)
+            {
+              $elem53 = null;
+              $elem53 = new \CroutonThrift\MetricsSample();
+              $xfer += $elem53->read($input);
+              $this->gauges []= $elem53;
+            }
+            $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('Metrics');
+    if ($this->counts !== null) {
+      if (!is_array($this->counts)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('counts', TType::LST, 1);
+      {
+        $output->writeListBegin(TType::STRUCT, count($this->counts));
+        {
+          foreach ($this->counts as $iter54)
+          {
+            $xfer += $iter54->write($output);
+          }
+        }
+        $output->writeListEnd();
+      }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->gauges !== null) {
+      if (!is_array($this->gauges)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('gauges', TType::LST, 2);
+      {
+        $output->writeListBegin(TType::STRUCT, count($this->gauges));
+        {
+          foreach ($this->gauges as $iter55)
+          {
+            $xfer += $iter55->write($output);
+          }
+        }
+        $output->writeListEnd();
+      }
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
 class ReportRequest {
   static $_TSPEC;
 
@@ -1528,6 +1854,14 @@ class ReportRequest {
    * @var \CroutonThrift\NamedCounter[]
    */
   public $counters = null;
+  /**
+   * @var \CroutonThrift\LogRecord[]
+   */
+  public $internal_logs = null;
+  /**
+   * @var \CroutonThrift\Metrics
+   */
+  public $internal_metrics = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
@@ -1576,6 +1910,20 @@ class ReportRequest {
             'class' => '\CroutonThrift\NamedCounter',
             ),
           ),
+        10 => array(
+          'var' => 'internal_logs',
+          'type' => TType::LST,
+          'etype' => TType::STRUCT,
+          'elem' => array(
+            'type' => TType::STRUCT,
+            'class' => '\CroutonThrift\LogRecord',
+            ),
+          ),
+        11 => array(
+          'var' => 'internal_metrics',
+          'type' => TType::STRUCT,
+          'class' => '\CroutonThrift\Metrics',
+          ),
         );
     }
     if (is_array($vals)) {
@@ -1599,6 +1947,12 @@ class ReportRequest {
       }
       if (isset($vals['counters'])) {
         $this->counters = $vals['counters'];
+      }
+      if (isset($vals['internal_logs'])) {
+        $this->internal_logs = $vals['internal_logs'];
+      }
+      if (isset($vals['internal_metrics'])) {
+        $this->internal_metrics = $vals['internal_metrics'];
       }
     }
   }
@@ -1633,15 +1987,15 @@ class ReportRequest {
         case 3:
           if ($ftype == TType::LST) {
             $this->span_records = array();
-            $_size35 = 0;
-            $_etype38 = 0;
-            $xfer += $input->readListBegin($_etype38, $_size35);
-            for ($_i39 = 0; $_i39 < $_size35; ++$_i39)
+            $_size56 = 0;
+            $_etype59 = 0;
+            $xfer += $input->readListBegin($_etype59, $_size56);
+            for ($_i60 = 0; $_i60 < $_size56; ++$_i60)
             {
-              $elem40 = null;
-              $elem40 = new \CroutonThrift\SpanRecord();
-              $xfer += $elem40->read($input);
-              $this->span_records []= $elem40;
+              $elem61 = null;
+              $elem61 = new \CroutonThrift\SpanRecord();
+              $xfer += $elem61->read($input);
+              $this->span_records []= $elem61;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1651,15 +2005,15 @@ class ReportRequest {
         case 4:
           if ($ftype == TType::LST) {
             $this->log_records = array();
-            $_size41 = 0;
-            $_etype44 = 0;
-            $xfer += $input->readListBegin($_etype44, $_size41);
-            for ($_i45 = 0; $_i45 < $_size41; ++$_i45)
+            $_size62 = 0;
+            $_etype65 = 0;
+            $xfer += $input->readListBegin($_etype65, $_size62);
+            for ($_i66 = 0; $_i66 < $_size62; ++$_i66)
             {
-              $elem46 = null;
-              $elem46 = new \CroutonThrift\LogRecord();
-              $xfer += $elem46->read($input);
-              $this->log_records []= $elem46;
+              $elem67 = null;
+              $elem67 = new \CroutonThrift\LogRecord();
+              $xfer += $elem67->read($input);
+              $this->log_records []= $elem67;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1690,17 +2044,43 @@ class ReportRequest {
         case 9:
           if ($ftype == TType::LST) {
             $this->counters = array();
-            $_size47 = 0;
-            $_etype50 = 0;
-            $xfer += $input->readListBegin($_etype50, $_size47);
-            for ($_i51 = 0; $_i51 < $_size47; ++$_i51)
+            $_size68 = 0;
+            $_etype71 = 0;
+            $xfer += $input->readListBegin($_etype71, $_size68);
+            for ($_i72 = 0; $_i72 < $_size68; ++$_i72)
             {
-              $elem52 = null;
-              $elem52 = new \CroutonThrift\NamedCounter();
-              $xfer += $elem52->read($input);
-              $this->counters []= $elem52;
+              $elem73 = null;
+              $elem73 = new \CroutonThrift\NamedCounter();
+              $xfer += $elem73->read($input);
+              $this->counters []= $elem73;
             }
             $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 10:
+          if ($ftype == TType::LST) {
+            $this->internal_logs = array();
+            $_size74 = 0;
+            $_etype77 = 0;
+            $xfer += $input->readListBegin($_etype77, $_size74);
+            for ($_i78 = 0; $_i78 < $_size74; ++$_i78)
+            {
+              $elem79 = null;
+              $elem79 = new \CroutonThrift\LogRecord();
+              $xfer += $elem79->read($input);
+              $this->internal_logs []= $elem79;
+            }
+            $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 11:
+          if ($ftype == TType::STRUCT) {
+            $this->internal_metrics = new \CroutonThrift\Metrics();
+            $xfer += $this->internal_metrics->read($input);
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -1734,9 +2114,9 @@ class ReportRequest {
       {
         $output->writeListBegin(TType::STRUCT, count($this->span_records));
         {
-          foreach ($this->span_records as $iter53)
+          foreach ($this->span_records as $iter80)
           {
-            $xfer += $iter53->write($output);
+            $xfer += $iter80->write($output);
           }
         }
         $output->writeListEnd();
@@ -1751,9 +2131,9 @@ class ReportRequest {
       {
         $output->writeListBegin(TType::STRUCT, count($this->log_records));
         {
-          foreach ($this->log_records as $iter54)
+          foreach ($this->log_records as $iter81)
           {
-            $xfer += $iter54->write($output);
+            $xfer += $iter81->write($output);
           }
         }
         $output->writeListEnd();
@@ -1783,13 +2163,38 @@ class ReportRequest {
       {
         $output->writeListBegin(TType::STRUCT, count($this->counters));
         {
-          foreach ($this->counters as $iter55)
+          foreach ($this->counters as $iter82)
           {
-            $xfer += $iter55->write($output);
+            $xfer += $iter82->write($output);
           }
         }
         $output->writeListEnd();
       }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->internal_logs !== null) {
+      if (!is_array($this->internal_logs)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('internal_logs', TType::LST, 10);
+      {
+        $output->writeListBegin(TType::STRUCT, count($this->internal_logs));
+        {
+          foreach ($this->internal_logs as $iter83)
+          {
+            $xfer += $iter83->write($output);
+          }
+        }
+        $output->writeListEnd();
+      }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->internal_metrics !== null) {
+      if (!is_object($this->internal_metrics)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('internal_metrics', TType::STRUCT, 11);
+      $xfer += $this->internal_metrics->write($output);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
@@ -1885,10 +2290,6 @@ class ReportResponse {
    * @var \CroutonThrift\Timing
    */
   public $timing = null;
-  /**
-   * @var string[]
-   */
-  public $errors = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
@@ -1907,14 +2308,6 @@ class ReportResponse {
           'type' => TType::STRUCT,
           'class' => '\CroutonThrift\Timing',
           ),
-        3 => array(
-          'var' => 'errors',
-          'type' => TType::LST,
-          'etype' => TType::STRING,
-          'elem' => array(
-            'type' => TType::STRING,
-            ),
-          ),
         );
     }
     if (is_array($vals)) {
@@ -1923,9 +2316,6 @@ class ReportResponse {
       }
       if (isset($vals['timing'])) {
         $this->timing = $vals['timing'];
-      }
-      if (isset($vals['errors'])) {
-        $this->errors = $vals['errors'];
       }
     }
   }
@@ -1952,15 +2342,15 @@ class ReportResponse {
         case 1:
           if ($ftype == TType::LST) {
             $this->commands = array();
-            $_size56 = 0;
-            $_etype59 = 0;
-            $xfer += $input->readListBegin($_etype59, $_size56);
-            for ($_i60 = 0; $_i60 < $_size56; ++$_i60)
+            $_size84 = 0;
+            $_etype87 = 0;
+            $xfer += $input->readListBegin($_etype87, $_size84);
+            for ($_i88 = 0; $_i88 < $_size84; ++$_i88)
             {
-              $elem61 = null;
-              $elem61 = new \CroutonThrift\Command();
-              $xfer += $elem61->read($input);
-              $this->commands []= $elem61;
+              $elem89 = null;
+              $elem89 = new \CroutonThrift\Command();
+              $xfer += $elem89->read($input);
+              $this->commands []= $elem89;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1971,23 +2361,6 @@ class ReportResponse {
           if ($ftype == TType::STRUCT) {
             $this->timing = new \CroutonThrift\Timing();
             $xfer += $this->timing->read($input);
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 3:
-          if ($ftype == TType::LST) {
-            $this->errors = array();
-            $_size62 = 0;
-            $_etype65 = 0;
-            $xfer += $input->readListBegin($_etype65, $_size62);
-            for ($_i66 = 0; $_i66 < $_size62; ++$_i66)
-            {
-              $elem67 = null;
-              $xfer += $input->readString($elem67);
-              $this->errors []= $elem67;
-            }
-            $xfer += $input->readListEnd();
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -2013,9 +2386,9 @@ class ReportResponse {
       {
         $output->writeListBegin(TType::STRUCT, count($this->commands));
         {
-          foreach ($this->commands as $iter68)
+          foreach ($this->commands as $iter90)
           {
-            $xfer += $iter68->write($output);
+            $xfer += $iter90->write($output);
           }
         }
         $output->writeListEnd();
@@ -2028,23 +2401,6 @@ class ReportResponse {
       }
       $xfer += $output->writeFieldBegin('timing', TType::STRUCT, 2);
       $xfer += $this->timing->write($output);
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->errors !== null) {
-      if (!is_array($this->errors)) {
-        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
-      }
-      $xfer += $output->writeFieldBegin('errors', TType::LST, 3);
-      {
-        $output->writeListBegin(TType::STRING, count($this->errors));
-        {
-          foreach ($this->errors as $iter69)
-          {
-            $xfer += $output->writeString($iter69);
-          }
-        }
-        $output->writeListEnd();
-      }
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();

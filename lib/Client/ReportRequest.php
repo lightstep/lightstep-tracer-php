@@ -12,7 +12,6 @@ class ReportRequest
     protected $_runtime = null;
     protected $_reportStartTime = 0;
     protected $_now = 0;
-    protected $_logRecords = null;
     protected $_spanRecords = null;
     protected $_counters = null;
 
@@ -21,15 +20,13 @@ class ReportRequest
      * @param Runtime $runtime
      * @param int $reportStartTime
      * @param int $now
-     * @param array $logRecords
      * @param array $spanRecords
      * @param array $counters
      */
-    public function __construct($runtime, $reportStartTime, $now, $logRecords, $spanRecords, $counters) {
+    public function __construct($runtime, $reportStartTime, $now, $spanRecords, $counters) {
         $this->_runtime = $runtime;
         $this->_reportStartTime = $reportStartTime;
         $this->_now = $now;
-        $this->_logRecords = $logRecords;
         $this->_spanRecords = $spanRecords;
         $this->_counters = $counters;
     }
@@ -47,12 +44,6 @@ class ReportRequest
             ]);
         }
 
-        // Convert the logs to thrift form
-        $thriftLogs = [];
-        foreach ($this->_logRecords as $lr) {
-            $thriftLogs[] = $lr->toThrift();
-        }
-
         // Convert the spans to thrift form
         $thriftSpans = [];
         foreach ($this->_spanRecords as $sr) {
@@ -63,7 +54,6 @@ class ReportRequest
             'runtime'         => $this->_runtime->toThrift(),
             'oldest_micros'   => $this->_reportStartTime,
             'youngest_micros' => $this->_now,
-            'log_records'     => $thriftLogs,
             'span_records'    => $thriftSpans,
             'counters'        => $thriftCounters,
         ]);
