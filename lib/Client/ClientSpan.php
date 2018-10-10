@@ -13,7 +13,7 @@ require_once(dirname(__FILE__) . "/../../thrift/CroutonThrift/Types.php");
 
 class ClientSpan implements \LightStepBase\Span {
 
-    protected $_tracer = null;
+    protected $_tracer = NULL;
 
     protected $_guid = "";
     protected $_traceGUID = "";

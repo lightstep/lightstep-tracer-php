@@ -12,11 +12,11 @@ use Lightstep\Collector\ReportRequest as ProtoReportRequest;
  */
 class ReportRequest
 {
-    protected $_runtime = null;
+    protected $_runtime = NULL;
     protected $_reportStartTime = 0;
     protected $_now = 0;
-    protected $_spanRecords = null;
-    protected $_counters = null;
+    protected $_spanRecords = NULL;
+    protected $_counters = NULL;
 
     /**
      * ReportRequest constructor.

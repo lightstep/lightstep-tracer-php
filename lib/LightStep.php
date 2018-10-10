@@ -37,7 +37,7 @@ class LightStep {
      * @throws Exception if the component name or access token is not a valid string
      * @throws Exception if the tracer singleton has already been initialized
      */
-    public static function initGlobalTracer($component_name, $access_token, $opts = null) {
+    public static function initGlobalTracer($component_name, $access_token, $opts = NULL) {
 
         if (!is_string($component_name) || strlen($component_name) == 0) {
             throw new Exception("Invalid component_name");

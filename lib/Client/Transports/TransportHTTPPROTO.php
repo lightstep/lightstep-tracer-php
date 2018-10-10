@@ -7,6 +7,15 @@ class TransportHTTPPROTO {
     protected $_port = 0;
     protected $_verbose = 0;
 
+    /**
+     * Assigns the variables that are required for connectivity.
+     *
+     * @param array $options Options for how to configure the transport. Expected keys are:
+     * 'verbose' - if true, payloads and errors will be logged
+     * 'collector_host' - hostname of the collector for the url
+     * 'collector_port' - port of the collector for the url
+     * 'collector_secure' - if true, will use SSL
+     */
     public function ensureConnection($options) {
         $this->_verbose = $options['verbose'];
 
@@ -14,7 +23,7 @@ class TransportHTTPPROTO {
         $this->_port = $options['collector_port'];
 
         // The prefixed protocol is only needed for secure connections
-        if ($options['collector_secure'] == True) {
+        if ($options['collector_secure'] == true) {
             $this->_host = "ssl://" . $this->_host;
         }
     }
@@ -24,12 +33,13 @@ class TransportHTTPPROTO {
             if ($this->_verbose > 0) {
                 error_log("Auth or report not set.");
             }
-            return null;
+            return NULL;
         }
 
         $content = $report->toProto($auth)->serializeToString();
 
         if ($this->_verbose >= 3) {
+            syslog(LOG_DEBUG, "Report to be flushed");
             var_dump($content);
         }
 
@@ -46,7 +56,7 @@ class TransportHTTPPROTO {
             if ($this->_verbose > 0) {
                 error_log($errstr);
             }
-            return null;
+            return NULL;
         }
 
         @fwrite($fp, "POST /api/v2/reports HTTP/1.1\r\n");
@@ -54,6 +64,6 @@ class TransportHTTPPROTO {
         @fflush($fp);
         @fclose($fp);
 
-        return null;
+        return NULL;
     }
 }

@@ -17,7 +17,7 @@ class Runtime
     protected $_guid = "";
     protected $_start_micros = 0;
     protected $_group_name = "";
-    protected $_attrs = null;
+    protected $_attrs = NULL;
 
     /**
      * Runtime constructor.
@@ -60,8 +60,7 @@ class Runtime
     public function toProto() {
         $tags = [];
         foreach ($this->_attrs as $attr) {
-            $tag = $attr->toProto();
-            $tags[] = $tag;
+            $tags[] = $attr->toProto();
         }
         $tags[] = new KeyValue([
             'key' => 'lightstep.component_name',

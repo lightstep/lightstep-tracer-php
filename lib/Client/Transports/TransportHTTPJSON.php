@@ -24,7 +24,7 @@ class TransportHTTPJSON {
             if ($this->_verbose > 0) {
                 error_log("Auth or report not set.");
             }
-            return null;
+            return NULL;
         }
 
         $thriftReport = $report->toThrift();
@@ -50,13 +50,13 @@ class TransportHTTPJSON {
             if ($this->_verbose > 0) {
                 error_log($errstr);
             }
-            return null;
+            return NULL;
         }
         @fwrite($fp, "POST /api/v0/reports HTTP/1.1\r\n");
         @fwrite($fp, $header . $content);
         @fflush($fp);
         @fclose($fp);
 
-        return null;
+        return NULL;
     }
 }

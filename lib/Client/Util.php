@@ -3,7 +3,7 @@ namespace LightStepBase\Client;
 
 class Util {
 
-    protected $_rng = null;
+    protected $_rng = NULL;
 
     public function __construct() {
         $seed = floor(microtime(TRUE) * 1000.0 * 1000.0);

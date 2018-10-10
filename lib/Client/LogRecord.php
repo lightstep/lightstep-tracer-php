@@ -12,8 +12,8 @@ use Google\Protobuf\Timestamp;
  */
 class LogRecord
 {
-    protected $_fields = null;
-    private $_util = null;
+    protected $_fields = NULL;
+    private $_util = NULL;
 
     /**
      * LogRecord constructor.

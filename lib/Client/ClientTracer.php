@@ -25,16 +25,16 @@ define('CARRIER_BAGGAGE_PREFIX', 'ot-baggage-');
  */
 class ClientTracer implements \LightStepBase\Tracer {
 
-    protected $_util = null;
+    protected $_util = NULL;
     protected $_options = [];
     protected $_enabled = true;
     protected $_debug = false;
 
     protected $_guid = "";
     protected $_startTime = 0;
-    protected $_auth = null;
-    protected $_runtime = null;
-    protected $_transport = null;
+    protected $_auth = NULL;
+    protected $_runtime = NULL;
+    protected $_transport = NULL;
 
     protected $_reportStartTime = 0;
     protected $_spanRecords = [];
@@ -382,7 +382,7 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         $this->_lastFlushMicros = $now;
 
-        $resp = null;
+        $resp = NULL;
         try {
             // It *is* valid for the transport to return a null response in the
             // case of a low-overhead "fire and forget" report
