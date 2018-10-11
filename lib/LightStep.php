@@ -4,6 +4,20 @@ use LightStepBase\Span;
 
 require_once(__DIR__ . '/vendor/Thrift/Type/TType.php');
 require_once(__DIR__ . '/Client/ClientTracer.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/Auth.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/KeyValue.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/Log.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/MetricsSample.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/InternalMetrics.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/Reference.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/Reference/Relationship.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/ReportRequest.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/Reporter.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/SpanContext.php');
+require_once(__DIR__ . '/generated/Lightstep/Collector/Span.php');
+require_once(__DIR__ . '/generated/GPBMetadata/Collector.php');
+require_once(__DIR__ . '/generated/GPBMetadata/Google/Api/Annotations.php');
+require_once(__DIR__ . '/generated/GPBMetadata/Google/Api/Http.php');
 
 class LightStep {
 
@@ -23,7 +37,7 @@ class LightStep {
      * @throws Exception if the component name or access token is not a valid string
      * @throws Exception if the tracer singleton has already been initialized
      */
-    public static function initGlobalTracer($component_name, $access_token, $opts = null) {
+    public static function initGlobalTracer($component_name, $access_token, $opts = NULL) {
 
         if (!is_string($component_name) || strlen($component_name) == 0) {
             throw new Exception("Invalid component_name");

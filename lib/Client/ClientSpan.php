@@ -1,12 +1,19 @@
 <?php
 namespace LightStepBase\Client;
 
+use Lightstep\Collector\Reference;
+use Lightstep\Collector\Reference\Relationship;
+use Lightstep\Collector\Span;
+use Lightstep\Collector\SpanContext;
+use Google\Protobuf\Timestamp;
+use LightStepBase\Tracer;
+
 require_once(dirname(__FILE__) . "/Util.php");
 require_once(dirname(__FILE__) . "/../../thrift/CroutonThrift/Types.php");
 
 class ClientSpan implements \LightStepBase\Span {
 
-    protected $_tracer = null;
+    protected $_tracer = NULL;
 
     protected $_guid = "";
     protected $_traceGUID = "";
@@ -126,7 +133,10 @@ class ClientSpan implements \LightStepBase\Span {
     }
 
     public function getParentGUID() {
-        return $this->_tags['parent_span_guid'];
+        if (array_key_exists('parent_span_guid', $this->_tags)) {
+            return $this->_tags['parent_span_guid'];
+        }
+        return NULL;
     }
 
     public function logEvent($event, $payload = NULL) {
@@ -259,5 +269,60 @@ class ClientSpan implements \LightStepBase\Span {
             "log_records"     => $thriftLogs,
         ]);
         return $rec;
+    }
+
+    /**
+     * @return Span A Proto representation of this object.
+     */
+    public function toProto() {
+        $spanContext = new SpanContext([
+            'trace_id' => Util::hexdec($this->traceGUID()),
+            'span_id' => Util::hexdec($this->guid()),
+        ]);
+
+        $ts = new Timestamp([
+            'seconds' => floor($this->_startMicros / 1000000),
+            'nanos' => $this->_startMicros % 1000000,
+        ]);
+
+        $tags = [];
+        foreach ($this->_tags as $key => $value) {
+            if ($key == 'parent_span_guid') {
+                continue;
+            }
+            $protoTag = new \Lightstep\Collector\KeyValue([
+                'key' => $key,
+                'string_value' => $value,
+            ]);
+            $tags[] = $protoTag;
+        }
+
+        $logs = [];
+        foreach ($this->_logRecords as $log) {
+            $logs[] = $log->toProto();
+        }
+
+        $references = [];
+        if ($this->getParentGUID() != NULL) {
+            $spanContext = new SpanContext([
+                'span_id' => Util::hexdec($this->getParentGUID())
+            ]);
+
+            $ref = new Reference([
+                'span_context' => $spanContext,
+                'relationship' => Relationship::CHILD_OF
+            ]);
+            $references[] = $ref;
+        }
+
+        return new Span([
+            'span_context' => $spanContext,
+            'operation_name' => strval($this->_operation),
+            'start_timestamp' => $ts,
+            'duration_micros' => $this->_endMicros-$this->_startMicros,
+            'tags' => $tags,
+            'logs' => $logs,
+            'references' => $references,
+        ]);
     }
 }

@@ -1,12 +1,21 @@
 <?php
 namespace LightStepBase\Client\Transports;
 
-class TransportHTTPJSON {
+class TransportHTTPPROTO {
 
     protected $_host = '';
     protected $_port = 0;
     protected $_verbose = 0;
 
+    /**
+     * Assigns the variables that are required for connectivity.
+     *
+     * @param array $options Options for how to configure the transport. Expected keys are:
+     * 'verbose' - if true, payloads and errors will be logged
+     * 'collector_host' - hostname of the collector for the url
+     * 'collector_port' - port of the collector for the url
+     * 'collector_secure' - if true, will use SSL
+     */
     public function ensureConnection($options) {
         $this->_verbose = $options['verbose'];
 
@@ -14,7 +23,7 @@ class TransportHTTPJSON {
         $this->_port = $options['collector_port'];
 
         // The prefixed protocol is only needed for secure connections
-        if ($options['collector_secure'] == True) {
+        if ($options['collector_secure'] == true) {
             $this->_host = "ssl://" . $this->_host;
         }
     }
@@ -27,21 +36,18 @@ class TransportHTTPJSON {
             return NULL;
         }
 
-        $thriftReport = $report->toThrift();
+        $content = $report->toProto($auth)->serializeToString();
 
         if ($this->_verbose >= 3) {
-            var_dump($thriftReport);
+            syslog(LOG_DEBUG, "Report to be flushed");
+            var_dump($content);
         }
-
-        $content = json_encode($thriftReport);
-        $content = gzencode($content);
 
         $header = "Host: " . $this->_host . "\r\n";
         $header .= "User-Agent: LightStep-PHP\r\n";
-        $header .= "LightStep-Access-Token: " . $auth->getAccessToken() . "\r\n";
-        $header .= "Content-Type: application/json\r\n";
+        $header .= "Accept: application/octet-stream\r\n";
+        $header .= "Content-Type: application/octet-stream\r\n";
         $header .= "Content-Length: " . strlen($content) . "\r\n";
-        $header .= "Content-Encoding: gzip\r\n";
         $header .= "Connection: keep-alive\r\n\r\n";
 
         // Use a persistent connection when possible
@@ -52,7 +58,8 @@ class TransportHTTPJSON {
             }
             return NULL;
         }
-        @fwrite($fp, "POST /api/v0/reports HTTP/1.1\r\n");
+
+        @fwrite($fp, "POST /api/v2/reports HTTP/1.1\r\n");
         @fwrite($fp, $header . $content);
         @fflush($fp);
         @fclose($fp);

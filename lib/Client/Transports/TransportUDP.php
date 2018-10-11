@@ -5,9 +5,9 @@ class TransportUDP {
 
     const MAX_MESSAGE_BYTES = 65535;
 
-    protected $_sock = null;
-    protected $_host = null;
-    protected $_post = null;
+    protected $_sock = NULL;
+    protected $_host = NULL;
+    protected $_post = NULL;
 
     public function ensureConnection($options) {
         $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
@@ -58,11 +58,11 @@ class TransportUDP {
         // Reset the connection if something went amiss
         if ($bytesSent === FALSE) {
             socket_close($this->_sock);
-            $this->_sock = null;
+            $this->_sock = NULL;
         }
 
         // By design, the UDP transport never returns a valid Thrift response
         // object
-        return null;
+        return NULL;
     }
 }

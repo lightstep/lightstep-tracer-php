@@ -9,6 +9,7 @@ require_once(dirname(__FILE__) . "/NoOpSpan.php");
 require_once(dirname(__FILE__) . "/Util.php");
 require_once(dirname(__FILE__) . "/Transports/TransportUDP.php");
 require_once(dirname(__FILE__) . "/Transports/TransportHTTPJSON.php");
+require_once(dirname(__FILE__) . "/Transports/TransportHTTPPROTO.php");
 require_once(dirname(__FILE__) . "/Version.php");
 require_once(dirname(__FILE__) . "/Auth.php");
 require_once(dirname(__FILE__) . "/Runtime.php");
@@ -24,16 +25,16 @@ define('CARRIER_BAGGAGE_PREFIX', 'ot-baggage-');
  */
 class ClientTracer implements \LightStepBase\Tracer {
 
-    protected $_util = null;
+    protected $_util = NULL;
     protected $_options = [];
     protected $_enabled = true;
     protected $_debug = false;
 
     protected $_guid = "";
     protected $_startTime = 0;
-    protected $_auth = null;
-    protected $_runtime = null;
-    protected $_transport = null;
+    protected $_auth = NULL;
+    protected $_runtime = NULL;
+    protected $_transport = NULL;
 
     protected $_reportStartTime = 0;
     protected $_spanRecords = [];
@@ -90,6 +91,8 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         if ($this->_options['transport'] == 'udp') {
             $this->_transport = new Transports\TransportUDP();
+        } if ($this->_options['transport'] == 'http_proto') {
+            $this->_transport = new Transports\TransportHTTPPROTO();
         } else {
             $this->_transport = new Transports\TransportHTTPJSON();
         }
@@ -379,7 +382,7 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         $this->_lastFlushMicros = $now;
 
-        $resp = null;
+        $resp = NULL;
         try {
             // It *is* valid for the transport to return a null response in the
             // case of a low-overhead "fire and forget" report
@@ -436,10 +439,7 @@ class ClientTracer implements \LightStepBase\Tracer {
      * Generates a random ID (not a RFC-4122 UUID).
      */
     public function _generateUUIDString() {
-        return sprintf("%08x%08x",
-            $this->_util->randInt32(),
-            $this->_util->randInt32()
-        );
+        return $this->_util->_generateUUIDString();
     }
 
     /**

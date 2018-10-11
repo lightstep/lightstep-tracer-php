@@ -1,6 +1,9 @@
 <?php
 namespace LightStepBase\Client;
 
+use Lightstep\Collector\Reporter;
+use Lightstep\Collector\KeyValue;
+
 require_once(dirname(__FILE__) . "/Util.php");
 require_once(dirname(__FILE__) . "/../../thrift/CroutonThrift/Types.php");
 
@@ -14,7 +17,7 @@ class Runtime
     protected $_guid = "";
     protected $_start_micros = 0;
     protected $_group_name = "";
-    protected $_attrs = null;
+    protected $_attrs = NULL;
 
     /**
      * Runtime constructor.
@@ -41,13 +44,32 @@ class Runtime
     {
         $thriftAttrs = [];
         foreach ($this->_attrs as $attr) {
-            $thriftAttrs[] = new \CroutonThrift\KeyValue($attr->GetKey(), $attr->GetValue());
+            $thriftAttrs[] = $attr->toThrift();
         }
         return new \CroutonThrift\Runtime([
             'guid' => $this->_guid,
             'start_micros' => $this->_start_micros,
             'group_name' => $this->_group_name,
             'attrs' => $thriftAttrs,
+        ]);
+    }
+
+    /**
+     * @return Reporter A Proto representation of this object.
+     */
+    public function toProto() {
+        $tags = [];
+        foreach ($this->_attrs as $attr) {
+            $tags[] = $attr->toProto();
+        }
+        $tags[] = new KeyValue([
+            'key' => 'lightstep.component_name',
+            'string_value' => $this->_group_name,
+        ]);
+
+        return new Reporter([
+            'tags' => $tags,
+            'reporter_id' => Util::hexdec($this->_guid),
         ]);
     }
 }

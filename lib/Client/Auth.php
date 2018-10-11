@@ -1,6 +1,8 @@
 <?php
 namespace LightStepBase\Client;
 
+use Lightstep\Collector\Auth as ProtoAuth;
+
 require_once(dirname(__FILE__) . "/Util.php");
 require_once(dirname(__FILE__) . "/../../thrift/CroutonThrift/Types.php");
 
@@ -33,6 +35,15 @@ class Auth
     public function toThrift() {
         return new \CroutonThrift\Auth([
             'access_token' => strval($this->_accessToken),
+        ]);
+    }
+
+    /**
+     * @return ProtoAuth A Proto representation of this object.
+     */
+    public function toProto() {
+        return new ProtoAuth([
+            'access_token' => $this->_accessToken
         ]);
     }
 }

@@ -11,6 +11,7 @@ jobs:
             - composer-cache-v1-{{ .Branch }}-{{ checksum "composer.lock" }}
             - composer-cache-v1-{{ .Branch }}-
             - composer-cache-v1-
+      - run: sudo docker-php-ext-install bcmath && sudo docker-php-ext-enable bcmath
       - run: make install_dependencies
       - run: make test
       - save_cache:

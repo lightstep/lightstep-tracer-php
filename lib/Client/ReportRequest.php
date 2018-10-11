@@ -2,6 +2,9 @@
 
 namespace LightStepBase\Client;
 
+use Lightstep\Collector\MetricsSample;
+use Lightstep\Collector\InternalMetrics;
+use Lightstep\Collector\ReportRequest as ProtoReportRequest;
 
 /**
  * Class ReportRequest encapsulates all of the information required to make an RPC call to the LightStep satellite.
@@ -9,11 +12,11 @@ namespace LightStepBase\Client;
  */
 class ReportRequest
 {
-    protected $_runtime = null;
+    protected $_runtime = NULL;
     protected $_reportStartTime = 0;
     protected $_now = 0;
-    protected $_spanRecords = null;
-    protected $_counters = null;
+    protected $_spanRecords = NULL;
+    protected $_counters = NULL;
 
     /**
      * ReportRequest constructor.
@@ -56,6 +59,34 @@ class ReportRequest
             'youngest_micros' => $this->_now,
             'span_records'    => $thriftSpans,
             'counters'        => $thriftCounters,
+        ]);
+    }
+
+    /**
+     * @param Auth $auth
+     * @return ProtoReportRequest A Proto representation of this object.
+     */
+    public function toProto($auth) {
+        $counts = [];
+        foreach ($this->_counters as $key => $value) {
+            $counts[] = new MetricsSample([
+                'name' => strval($key),
+                'int_value' => intval($value),
+            ]);
+        }
+        $internalMetrics = new InternalMetrics([
+            'counts' => $counts
+        ]);
+
+        $spans = [];
+        foreach ($this->_spanRecords as $sr) {
+            $spans[] = $sr->toProto();
+        }
+        return new ProtoReportRequest([
+            'auth' => $auth->toProto(),
+            'internal_metrics' => $internalMetrics,
+            'reporter' => $this->_runtime->toProto(),
+            'spans' => $spans,
         ]);
     }
 }

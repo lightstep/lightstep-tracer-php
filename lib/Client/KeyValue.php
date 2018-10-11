@@ -46,4 +46,14 @@ class KeyValue
             'Value' => $this->_value,
         ]);
     }
+
+    /**
+     * @return \Lightstep\Collector\KeyValue A Proto representation of this object.
+     */
+    public function toProto() {
+        return new \Lightstep\Collector\KeyValue([
+            'key' => $this->_key,
+            'string_value' => $this->_value,
+        ]);
+    }
 }
