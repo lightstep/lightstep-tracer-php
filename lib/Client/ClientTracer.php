@@ -91,7 +91,7 @@ class ClientTracer implements \LightStepBase\Tracer {
 
         if ($this->_options['transport'] == 'udp') {
             $this->_transport = new Transports\TransportUDP();
-        } if ($this->_options['transport'] == 'http_proto') {
+        } else if ($this->_options['transport'] == 'http_proto') {
             $this->_transport = new Transports\TransportHTTPPROTO();
         } else {
             $this->_transport = new Transports\TransportHTTPJSON();
