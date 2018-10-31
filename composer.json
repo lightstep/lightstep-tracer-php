@@ -5,13 +5,17 @@
     "require": {
         "ruafozy/mersenne-twister": "^1.3",
         "google/protobuf": ">=3.6.1",
-        "ext-bcmath": "*"
+        "ext-bcmath": "*",
+        "psr/log": "^1.0"
     },
     "require-dev": {
         "phpdocumentor/phpdocumentor": "^2.8.5",
         "phpunit/phpunit": "~4.8.20"
     },
     "autoload": {
+        "psr-4": {
+            "LightStepBase\\": "lib"
+        },
         "files": [
             "lib/LightStep.php"
         ]

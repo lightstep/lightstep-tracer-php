@@ -2,6 +2,8 @@
 namespace LightStepBase\Client;
 
 use LightStepBase\Span;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 
 require_once(dirname(__FILE__) . "/../api.php");
 require_once(dirname(__FILE__) . "/ClientSpan.php");
@@ -23,7 +25,9 @@ define('CARRIER_BAGGAGE_PREFIX', 'ot-baggage-');
 /**
  * Main implementation of the Tracer interface
  */
-class ClientTracer implements \LightStepBase\Tracer {
+class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
+
+    use LoggerAwareTrait;
 
     protected $_util = NULL;
     protected $_options = [];
@@ -90,11 +94,11 @@ class ClientTracer implements \LightStepBase\Tracer {
         $this->options(array_merge($defaults, $options));
 
         if ($this->_options['transport'] == 'udp') {
-            $this->_transport = new Transports\TransportUDP();
+            $this->_transport = new Transports\TransportUDP($this->logger());
         } if ($this->_options['transport'] == 'http_proto') {
-            $this->_transport = new Transports\TransportHTTPPROTO();
+            $this->_transport = new Transports\TransportHTTPPROTO($this->logger());
         } else {
-            $this->_transport = new Transports\TransportHTTPJSON();
+            $this->_transport = new Transports\TransportHTTPJSON($this->logger());
         }
 
         // Note: the GUID is not generated until the library is initialized
@@ -467,7 +471,17 @@ class ClientTracer implements \LightStepBase\Tracer {
 
     protected function _debugRecordError($e) {
         if ($this->_debug) {
-            error_log($e);
+            $this->logger()->debug($e);
         }
+    }
+
+    protected function logger()
+    {
+
+        if (! $this->logger) {
+            $this->setLogger(new SystemLogger);
+        }
+
+        return $this->logger;
     }
 }
