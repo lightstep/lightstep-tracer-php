@@ -95,7 +95,7 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
 
         if ($this->_options['transport'] == 'udp') {
             $this->_transport = new Transports\TransportUDP($this->logger());
-        } if ($this->_options['transport'] == 'http_proto') {
+        } else if ($this->_options['transport'] == 'http_proto') {
             $this->_transport = new Transports\TransportHTTPPROTO($this->logger());
         } else {
             $this->_transport = new Transports\TransportHTTPJSON($this->logger());
