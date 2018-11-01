@@ -1,11 +1,23 @@
 <?php
 namespace LightStepBase\Client\Transports;
 
+use LightStepBase\Client\SystemLogger;
+use Psr\Log\LoggerInterface;
+
 class TransportHTTPJSON {
 
     protected $_host = '';
     protected $_port = 0;
     protected $_verbose = 0;
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    public function __construct(LoggerInterface $logger = null) {
+
+        $this->logger = $logger ?: new SystemLogger;
+    }
 
     public function ensureConnection($options) {
         $this->_verbose = $options['verbose'];
@@ -22,7 +34,7 @@ class TransportHTTPJSON {
     public function flushReport($auth, $report) {
         if (is_null($auth) || is_null($report)) {
             if ($this->_verbose > 0) {
-                error_log("Auth or report not set.");
+                $this->logger->error("Auth or report not set.");
             }
             return NULL;
         }
@@ -30,7 +42,7 @@ class TransportHTTPJSON {
         $thriftReport = $report->toThrift();
 
         if ($this->_verbose >= 3) {
-            var_dump($thriftReport);
+            $this->logger->debug('report contents:', $thriftReport);
         }
 
         $content = json_encode($thriftReport);
@@ -48,7 +60,7 @@ class TransportHTTPJSON {
         $fp = @pfsockopen($this->_host, $this->_port, $errno, $errstr);
         if (!$fp) {
             if ($this->_verbose > 0) {
-                error_log($errstr);
+                $this->logger->error($errstr);
             }
             return NULL;
         }
