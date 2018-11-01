@@ -1,11 +1,23 @@
 <?php
 namespace LightStepBase\Client\Transports;
 
+use LightStepBase\Client\SystemLogger;
+use Psr\Log\LoggerInterface;
+
 class TransportHTTPPROTO {
 
     protected $_host = '';
     protected $_port = 0;
     protected $_verbose = 0;
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    public function __construct(LoggerInterface $logger = null) {
+
+        $this->logger = $logger ?: new SystemLogger;
+    }
 
     /**
      * Assigns the variables that are required for connectivity.
@@ -31,7 +43,7 @@ class TransportHTTPPROTO {
     public function flushReport($auth, $report) {
         if (is_null($auth) || is_null($report)) {
             if ($this->_verbose > 0) {
-                error_log("Auth or report not set.");
+                $this->logger->error("Auth or report not set.");
             }
             return NULL;
         }
@@ -39,8 +51,7 @@ class TransportHTTPPROTO {
         $content = $report->toProto($auth)->serializeToString();
 
         if ($this->_verbose >= 3) {
-            syslog(LOG_DEBUG, "Report to be flushed");
-            var_dump($content);
+            $this->logger->debug('Report to be flushed', ['content' => $content]);
         }
 
         $header = "Host: " . $this->_host . "\r\n";
@@ -54,7 +65,7 @@ class TransportHTTPPROTO {
         $fp = @pfsockopen($this->_host, $this->_port, $errno, $errstr);
         if (!$fp) {
             if ($this->_verbose > 0) {
-                error_log($errstr);
+                $this->logger->error($errstr);
             }
             return NULL;
         }

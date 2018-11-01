@@ -1,6 +1,9 @@
 <?php
 namespace LightStepBase\Client\Transports;
 
+use LightStepBase\Client\SystemLogger;
+use Psr\Log\LoggerInterface;
+
 class TransportUDP {
 
     const MAX_MESSAGE_BYTES = 65535;
@@ -8,6 +11,15 @@ class TransportUDP {
     protected $_sock = NULL;
     protected $_host = NULL;
     protected $_post = NULL;
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    public function __construct(LoggerInterface $logger = null) {
+
+        $this->logger = $logger ?: new SystemLogger;
+    }
 
     public function ensureConnection($options) {
         $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
@@ -57,6 +69,7 @@ class TransportUDP {
 
         // Reset the connection if something went amiss
         if ($bytesSent === FALSE) {
+            $this->logger->error('Socket returned error code: ' . socket_last_error($this->_sock));
             socket_close($this->_sock);
             $this->_sock = NULL;
         }
