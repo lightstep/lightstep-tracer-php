@@ -95,6 +95,13 @@ class ClientSpan implements \LightStepBase\Span {
         return $this;
     }
 
+    public function setTags($fields) {
+        foreach ($fields as $item) {
+            $this->setTag($item[0], $item[1]);
+        }
+        return $this;
+    }
+
     public function setTag($key, $value) {
         $this->_tags[$key] = $value;
         return $this;
