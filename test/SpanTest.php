@@ -83,6 +83,17 @@ class SpanTest extends BaseLightStepTest {
         $span->finish();
     }
 
+    public function testSpanFieldsHaveCorrectKeysAndValues() {
+        $tracer = LightStep::newTracer("test_group", "1234567890");
+        $span = $tracer->startSpan("multi_attribute_span", array('tags' => array( 'foo' => 'bar', 'baz' => 'quuz')));
+        $tags = $this->peek($span, "_tags");
+        $this->assertArrayHasKey('foo', $tags);
+        $this->assertSame('bar', $tags['foo']);
+        $this->assertArrayHasKey('baz', $tags);
+        $this->assertSame('quuz', $tags['baz']);
+        $span->finish();
+    }
+
     public function testStartSpanWithParent() {
         $tracer = LightStep::newTracer('test_group', '1234567890');
 
