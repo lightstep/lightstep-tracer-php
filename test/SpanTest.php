@@ -70,21 +70,21 @@ class SpanTest extends BaseLightStepTest {
     }
 
     public function testSpanFields() {
-        $tracer = LightStep::newTracer("test_group", "1234567890");
+        $tracer = $this->createTestTracer("test_group", "1234567890");
         $span = $tracer->startSpan("multi_attribute_span", array('tags' => array( 'foo' => 'bar', 'baz' => 'quuz')));
         $this->assertEquals(count($this->peek($span, "_tags")), 2);
         $span->finish();
     }
 
     public function testSpanFieldsWithNullValues() {
-        $tracer = LightStep::newTracer("test_group", "1234567890");
+        $tracer = $this->createTestTracer("test_group", "1234567890");
         $span = $tracer->startSpan("null_value_multi_attribute_span", array('tags' => array('foo' => 'bar', 'nullValue' => null)));
         $this->assertEquals(count($this->peek($span, "_tags")), 2);
         $span->finish();
     }
 
     public function testSpanFieldsHaveCorrectKeysAndValues() {
-        $tracer = LightStep::newTracer("test_group", "1234567890");
+        $tracer = $this->createTestTracer("test_group", "1234567890");
         $span = $tracer->startSpan("multi_attribute_span", array('tags' => array( 'foo' => 'bar', 'baz' => 'quuz')));
         $tags = $this->peek($span, "_tags");
         $this->assertArrayHasKey('foo', $tags);
