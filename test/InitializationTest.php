@@ -7,7 +7,10 @@ class InitializationTest extends BaseLightStepTest {
         completed, the runtime should buffer that data until the init call.
      */
     public function testOutOfOrderInitializationDoesntFail() {
-        $runtime = LightStep::newTracer(NULL, NULL);
+        $opts = [
+            "debug_disable_flush" => "true"
+        ];
+        $runtime = LightStep::newTracer(NULL, NULL, $opts);
         $span = $runtime->startSpan("test_span");
         $span->infof("log000");
 
@@ -25,7 +28,10 @@ class InitializationTest extends BaseLightStepTest {
     }
 
     public function testMultipleInitCalls() {
-        $runtime = LightStep::newTracer(NULL, NULL);
+        $opts = [
+            "debug_disable_flush" => "true"
+        ];
+        $runtime = LightStep::newTracer(NULL, NULL, $opts);
         $span = $runtime->startSpan("test_span");
 
         $this->assertGreaterThan(0, $this->peek($runtime, "_options")['max_log_records']);
@@ -47,7 +53,10 @@ class InitializationTest extends BaseLightStepTest {
     }
 
     public function testSpanBufferingBeforeInit() {
-        $runtime = LightStep::newTracer(NULL, NULL);
+        $opts = [
+            "debug_disable_flush" => "true"
+        ];
+        $runtime = LightStep::newTracer(NULL, NULL, $opts);
         $span = $runtime->startSpan("first");
         $span->infof('Hello %s', 'World');
         $span->finish();
