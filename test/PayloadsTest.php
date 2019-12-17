@@ -12,7 +12,7 @@ class TestClass001 {
 class PayloadsTest extends BaseLightStepTest {
 
     public function testDataTypes() {
-        $runtime = LightStep::newTracer("test_group", "1234567890");
+        $runtime = $this->createTestTracer("test_group", "1234567890");
         $span = $runtime->startSpan('test_span');
         $span->infof("This doesn't have a payload");
 
@@ -55,7 +55,7 @@ class PayloadsTest extends BaseLightStepTest {
     }
 
     public function testDataTypes2() {
-        $runtime = LightStep::newTracer("test_group", "1234567890");
+        $runtime = $this->createTestTracer("test_group", "1234567890");
         $span = $runtime->startSpan('test_span');
 
         $span->infof("This doesn't have a payload");
@@ -100,7 +100,7 @@ class PayloadsTest extends BaseLightStepTest {
     }
 
     public function testCircularReferences() {
-        $runtime = LightStep::newTracer("test_group", "1234567890");
+        $runtime = $this->createTestTracer("test_group", "1234567890");
         $span = $runtime->startSpan('test_span');
 
         $a = array('next' => null);
@@ -122,7 +122,7 @@ class PayloadsTest extends BaseLightStepTest {
     }
 
     public function testDeeplyNested() {
-        $runtime = LightStep::newTracer("test_group", "1234567890");
+        $runtime = $this->createTestTracer("test_group", "1234567890");
         $span = $runtime->startSpan('test_span');
         $span->infof("test", $this->_wrapValue("value!", 2));
         $span->infof("test", $this->_wrapValue("value!", 4));
