@@ -10,7 +10,7 @@ abstract class BaseLightStepTest extends PHPUnit_Framework_TestCase
 {
     protected function createTestTracer($component_name, $access_token) {
         $opts = [
-            "debug_disable_flush" => "true"
+            "debug_disable_flush" => TRUE
         ];
 
         return LightStep::newTracer("test_group", "1234567890", $opts);
