@@ -97,7 +97,7 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
             $defaults['max_span_records'] = 16;
         }
 
-        // combine default and custom trsacer attributes
+        // combine default and custom tracer attributes
         if (isset($options['attributes'])) {
             $options['attributes'] = array_merge($defaults['attributes'], $options['attributes']);
         }
