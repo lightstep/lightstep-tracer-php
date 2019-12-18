@@ -4,30 +4,36 @@ install: install_dependencies test docs
 
 .PHONY: install_dependencies
 install_dependencies:
+	@echo [Installing dependencies]
 	composer install
 
 .PHONY: test
 test:
+	@echo [Executing tests]
 	vendor/bin/phpunit
 
 .PHONY: docs
 docs:
+	@echo [Creating docs]
 	php vendor/bin/phpdoc
 
 .PHONY: clean
 clean:
+	@echo [Cleaning workspace]
 	rm -rf intermediate
 	rm -rf dist/apidocs
 	rm -rf vendor
 
 .PHONY: inc_version
 inc_version:
+	@echo [Getting inc version]
 	node scripts/inc_version
 
 # Packagist looks for new tags in the git repo to find newly published
 # packages
 .PHONY: publish
 publish: pre-publish inc_version
+	@echo [Publishing package]
 	git add .
 	git commit -m "Increment version to $(shell cat VERSION)"
 	git tag $(shell cat VERSION)
