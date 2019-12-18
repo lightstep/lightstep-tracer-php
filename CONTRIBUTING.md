@@ -57,7 +57,7 @@ _Note that this section should be treated as a general guideline and replaced wi
 
 We're happy to help with any questions you may have on the git or GitHub side, e.g., how to push a branch to your fork. Just create an issue and we'll try to help answer them :)
 
-## Coding style
+## Style Guide
 
 We utilize a [.editorconfig](./.editorconfig) to enforce common styling preferences such as tab width, trimming trailing whitespace, etc.
 
