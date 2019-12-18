@@ -56,3 +56,9 @@ _Note that this section should be treated as a general guideline and replaced wi
 1. Get it merged! 🎉
 
 We're happy to help with any questions you may have on the git or GitHub side, e.g., how to push a branch to your fork. Just create an issue and we'll try to help answer them :)
+
+## Style Guide
+
+We utilize a [.editorconfig](./.editorconfig) to enforce common styling preferences such as tab width, trimming trailing whitespace, etc.
+
+Please see https://editorconfig.org for more details.
