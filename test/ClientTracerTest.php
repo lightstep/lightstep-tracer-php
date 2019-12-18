@@ -28,4 +28,64 @@ class ClientTracerTest extends BaseLightStepTest
             'http_proto' => ['http_proto', TransportHTTPPROTO::class],
         ];
     }
+
+    public function testDefaultTracerAttributesAreAdded() {
+        $opts = [
+            'component_name' => 'test_group',
+            'access_token' => '1234567890',
+            'debug_disable_flush' => TRUE
+        ];
+        $tracer = new ClientTracer($opts);
+        $attributes = $this->peek($tracer, '_options')['attributes'];
+
+        $this->assertArrayHasKey('lightstep.tracer_platform', $attributes);
+        $this->assertSame('php', $attributes['lightstep.tracer_platform']);
+
+        $this->assertArrayHasKey('lightstep.tracer_platform_version', $attributes);
+        $this->assertSame(phpversion(), $attributes['lightstep.tracer_platform_version']);
+
+        $this->assertArrayHasKey('lightstep.tracer_version', $attributes);
+        $this->assertSame(LIGHTSTEP_VERSION, $attributes['lightstep.tracer_version']);
+    }
+
+    public function testSettingCustomTracerAttributes() {
+        $opts = [
+            'component_name' => 'test_group',
+            'access_token' => '1234567890',
+            'debug_disable_flush' => TRUE,
+            'attributes' => [
+                'foo' => 'bar'
+            ]
+        ];
+        $tracer = new ClientTracer($opts);
+        $attributes = $this->peek($tracer, '_options')['attributes'];
+
+        $this->assertArrayHasKey('foo', $attributes);
+        $this->assertSame($attributes['foo'], 'bar');
+    }
+
+    public function testAddingCustomAttributeDoesNotRemoveDefaultAttributes() {
+        $opts = [
+            'component_name' => 'test_group',
+            'access_token' => '1234567890',
+            'debug_disable_flush' => TRUE,
+            'attributes' => [
+                'foo' => 'bar'
+            ]
+        ];
+        $tracer = new ClientTracer($opts);
+        $attributes = $this->peek($tracer, '_options')['attributes'];
+
+        $this->assertArrayHasKey('lightstep.tracer_platform', $attributes);
+        $this->assertSame('php', $attributes['lightstep.tracer_platform']);
+
+        $this->assertArrayHasKey('lightstep.tracer_platform_version', $attributes);
+        $this->assertSame(phpversion(), $attributes['lightstep.tracer_platform_version']);
+
+        $this->assertArrayHasKey('lightstep.tracer_version', $attributes);
+        $this->assertSame(LIGHTSTEP_VERSION, $attributes['lightstep.tracer_version']);
+
+        $this->assertArrayHasKey('foo', $attributes);
+        $this->assertSame($attributes['foo'], 'bar');
+    }
 }
