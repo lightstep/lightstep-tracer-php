@@ -77,6 +77,13 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
 
             // Flag intended solely to unit testing convenience
             'debug_disable_flush'   => false,
+
+            // default tracer attributes
+            'attributes'            => [
+                'lightstep.tracer_platform' => 'php',
+                'lightstep.tracer_platform_version' => phpversion(),
+                'lightstep.tracer_version'  => LIGHTSTEP_VERSION,
+            ]
         ];
 
         // Modify some of the interdependent defaults based on what the user-specified
@@ -88,6 +95,11 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
         if (isset($options['transport']) && $options['transport'] == 'udp') {
             $defaults['max_log_records'] = 16;
             $defaults['max_span_records'] = 16;
+        }
+
+        // combine default and custom trsacer attributes
+        if (isset($options['attributes'])) {
+            $options['attributes'] = array_merge($defaults['attributes'], $options['attributes']);
         }
 
         // Set the options, merged with the defaults
@@ -177,20 +189,13 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
             return;
         }
 
-        // Tracer attributes
-        $runtimeAttrs = [
-            'lightstep.tracer_platform' => 'php',
-            'lightstep.tracer_platform_version' => phpversion(),
-            'lightstep.tracer_version'  => LIGHTSTEP_VERSION,
-        ];
-
         // Generate the GUID on initialization as the GUID should be
         // stable for a particular access token / component name combo.
         $this->_guid = $this->_generateStableUUID($accessToken, $componentName);
         $this->_auth = new Auth($accessToken);
 
         $attrs = [];
-        foreach ($runtimeAttrs as $key => $value) {
+        foreach ($this->_options['attributes'] as $key => $value) {
             $attrs[] = new KeyValue(strval($key), strval($value));
         }
         $this->_runtime = new Runtime(strval($this->_guid), intval($this->_startTime), strval($componentName), $attrs);
