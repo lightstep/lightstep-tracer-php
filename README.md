@@ -50,7 +50,7 @@ LightStep::initGlobalTracer('examples/trivial_process', '{your_access_token}', [
     'collector_host' => '<FDQN or IP>',
     'collector_port' => '<port>'
 ]);
-``
+```
 
 ## Developer Setup
 
