@@ -39,9 +39,22 @@ $span->finish();
 
 See `lib/api.php` for detailed API documentation.
 
+### Setting collector endpoint and port
+
+You can override the default endpoint and port that spans are sent to by setting `collector_host` and `collector_port` options when initalizing the tracer.
+
+For example when using the global initializer:
+
+```php
+LightStep::initGlobalTracer('examples/trivial_process', '{your_access_token}', [
+    'collector_host' => '<FDQN or IP>',
+    'collector_port' => '<port>'
+]);
+```
+
 ## Developer Setup
 
-```
+```bash
 brew install composer
 make install
 make test
