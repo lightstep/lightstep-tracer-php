@@ -28,7 +28,7 @@ class TransportHTTPJSON {
 
         // The prefixed protocol is only needed for secure connections
         if ($options['collector_secure'] == True) {
-            $this->_scheme = "ssl://";
+            $this->_scheme = 'tls://';
         }
     }
 
