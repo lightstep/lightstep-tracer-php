@@ -37,7 +37,7 @@ class TransportHTTPPROTO {
 
         // The prefixed protocol is only needed for secure connections
         if ($options['collector_secure'] == true) {
-            $this->_scheme = 'ssl://';
+            $this->_scheme = 'tls://';
         }
     }
 
