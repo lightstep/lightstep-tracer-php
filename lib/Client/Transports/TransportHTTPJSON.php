@@ -68,6 +68,10 @@ class TransportHTTPJSON {
         @fwrite($fp, "POST /api/v0/reports HTTP/1.1\r\n");
         @fwrite($fp, $header . $content);
         @fflush($fp);
+        // Wait and read first line of the response e.g. (HTTP/1.1 2xx OK)
+        // otherwise the connection will close before the request is complete,
+        // leading to a context cancellation down stream.
+        fgets($fp);
         @fclose($fp);
 
         return NULL;
