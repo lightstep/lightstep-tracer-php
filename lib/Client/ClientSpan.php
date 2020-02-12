@@ -311,12 +311,13 @@ class ClientSpan implements \LightStepBase\Span {
 
         $references = [];
         if ($this->getParentGUID() != NULL) {
-            $spanContext = new SpanContext([
+            $parentSpanContext = new SpanContext([
+                'trace_id' => Util::hexdec($this->traceGUID()),
                 'span_id' => Util::hexdec($this->getParentGUID())
             ]);
 
             $ref = new Reference([
-                'span_context' => $spanContext,
+                'span_context' => $parentSpanContext,
                 'relationship' => Relationship::CHILD_OF
             ]);
             $references[] = $ref;
