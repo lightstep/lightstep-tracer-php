@@ -289,7 +289,7 @@ class ClientSpan implements \LightStepBase\Span {
 
         $ts = new Timestamp([
             'seconds' => floor($this->_startMicros / 1000000),
-            'nanos' => $this->_startMicros % 1000000,
+            'nanos' => ($this->_startMicros % 1000000) * 100,
         ]);
 
         $tags = [];
