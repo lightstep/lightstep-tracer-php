@@ -32,9 +32,8 @@ class Util {
     public function _generateUUIDString() {
         // must return less than 7fffffffffffffff
 
-        return sprintf("%08x%08x",
-            $this->randInt32(),
-            $this->randInt32()
+        return sprintf("%08x",
+            $this->randIntRange(0, PHP_INT_MAX)
         );
     }
 
