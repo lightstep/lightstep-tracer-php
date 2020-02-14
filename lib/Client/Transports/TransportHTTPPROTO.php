@@ -9,7 +9,7 @@ class TransportHTTPPROTO {
     protected $_host = '';
     protected $_port = 0;
     protected $_verbose = 0;
-    protected $_timeout = null;
+    protected $_timeout;
 
     /**
      * @var LoggerInterface
@@ -19,6 +19,7 @@ class TransportHTTPPROTO {
     public function __construct(LoggerInterface $logger = null) {
 
         $this->logger = $logger ?: new SystemLogger;
+        $this->_timeout = ini_get("default_socket_timeout");
     }
 
     /**
