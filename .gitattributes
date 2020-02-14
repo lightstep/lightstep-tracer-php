@@ -1,16 +1,20 @@
-.circleci          export-ignore
-assests            export-ignore
-dist               export-ignore
-scripts            export-ignore
-test               export-ignore
+# directories
+.circleci export-ignore
+assets export-ignore
+dist export-ignore
+scripts export-ignore
+test export-ignore
 
-.editorconfig      export-ignore
-.gitattributes     export-ignore
-.gitignore         export-ignore
-CHANGELOG.md       export-ignore
-circle.yml         export-ignore
-CONTRIBUTING.md    export-ignore
-Makefile           export-ignore
-phpdoc.dist.xml    export-ignore
-phpunit.xml.dist   export-ignore
-VERSION            export-ignore
+# root files
+.editorconfig export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+CHANGELOG.md export-ignore
+circle.yml export-ignore
+CONTRIBUTING.md export-ignore
+LICENSE export-ignore
+Makefile export-ignore
+phpdoc.dist.xml export-ignore
+phpunit.xml.dist export-ignore
+README.md export-ignore
+VERSION export-ignore
