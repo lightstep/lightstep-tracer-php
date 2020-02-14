@@ -38,7 +38,7 @@ class ProtoTypesTest extends BaseLightStepTest {
 
         $this->assertEquals("my_operation", $protoSpan->getOperationName());
         $this->assertEquals(1538476581, $protoSpan->getStartTimestamp()->getSeconds());
-        $this->assertEquals(123456, $protoSpan->getStartTimestamp()->getNanos());
+        $this->assertEquals(12345600, $protoSpan->getStartTimestamp()->getNanos());
         $this->assertEquals(1000, $protoSpan->getDurationMicros());
 
         $references = $protoSpan->getReferences();
@@ -210,7 +210,7 @@ class ProtoTypesTest extends BaseLightStepTest {
 
         $this->assertEquals("my_operation", $protoSpan->getOperationName());
         $this->assertEquals(1538476581, $protoSpan->getStartTimestamp()->getSeconds());
-        $this->assertEquals(123456, $protoSpan->getStartTimestamp()->getNanos());
+        $this->assertEquals(12345600, $protoSpan->getStartTimestamp()->getNanos());
         $this->assertEquals(1000, $protoSpan->getDurationMicros());
 
         $references = $protoSpan->getReferences();
