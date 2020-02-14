@@ -10,6 +10,8 @@ class TransportHTTPPROTO {
     protected $_host = '';
     protected $_port = 0;
     protected $_verbose = 0;
+    protected $_timeout;
+
     /**
      * @var LoggerInterface
      */
@@ -18,6 +20,7 @@ class TransportHTTPPROTO {
     public function __construct(LoggerInterface $logger = null) {
 
         $this->logger = $logger ?: new SystemLogger;
+        $this->_timeout = ini_get("default_socket_timeout");
     }
 
     /**
@@ -38,6 +41,10 @@ class TransportHTTPPROTO {
         // The prefixed protocol is only needed for secure connections
         if ($options['collector_secure'] == true) {
             $this->_scheme = 'tls://';
+        }
+
+        if (isset($options['http_connection_timeout'])) {
+            $this->_timeout = $options['http_connection_timeout'];
         }
     }
 
@@ -63,7 +70,7 @@ class TransportHTTPPROTO {
         $header .= "Connection: keep-alive\r\n\r\n";
 
         // Use a persistent connection when possible
-        $fp = @pfsockopen($this->_scheme . $this->_host, $this->_port, $errno, $errstr);
+        $fp = @pfsockopen($this->_scheme . $this->_host, $this->_port, $errno, $errstr, $this->_timeout);
         if (!$fp) {
             if ($this->_verbose > 0) {
                 $this->logger->error($errstr);
