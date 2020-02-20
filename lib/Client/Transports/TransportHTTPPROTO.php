@@ -6,6 +6,8 @@ use Psr\Log\LoggerInterface;
 
 class TransportHTTPPROTO {
 
+    const DEFAULT_SCHEME = 'tls://';
+
     protected $_scheme = '';
     protected $_host = '';
     protected $_port = 0;
@@ -40,7 +42,11 @@ class TransportHTTPPROTO {
 
         // The prefixed protocol is only needed for secure connections
         if ($options['collector_secure'] == true) {
-            $this->_scheme = 'tls://';
+            if (isset($options['collector_scheme'])) {
+                $this->_scheme = $options['collector_scheme'];
+            } else {
+                $this->_scheme = self::DEFAULT_SCHEME;
+            }
         }
 
         if (isset($options['http_connection_timeout'])) {

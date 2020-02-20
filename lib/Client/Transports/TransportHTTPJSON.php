@@ -6,6 +6,8 @@ use Psr\Log\LoggerInterface;
 
 class TransportHTTPJSON {
 
+    const DEFAULT_SCHEME = 'tls://';
+
     protected $_scheme = '';
     protected $_host = '';
     protected $_port = 0;
@@ -30,8 +32,12 @@ class TransportHTTPJSON {
         $this->_port = $options['collector_port'];
 
         // The prefixed protocol is only needed for secure connections
-        if ($options['collector_secure'] == True) {
-            $this->_scheme = 'tls://';
+        if ($options['collector_secure'] == true) {
+            if (isset($options['collector_scheme'])) {
+                $this->_scheme = $options['collector_scheme'];
+            } else {
+                $this->_scheme = self::DEFAULT_SCHEME;
+            }
         }
 
         if (isset($options['http_connection_timeout'])) {

@@ -88,4 +88,48 @@ class ClientTracerTest extends BaseLightStepTest
         $this->assertArrayHasKey('foo', $attributes);
         $this->assertSame($attributes['foo'], 'bar');
     }
+
+    public function testDefaultTransportSchemeIsTls() {
+        $transports = ['http_json', 'http_proto'];
+
+        foreach ($transports as $transportType) {
+            $opts = [
+                'component_name' => 'test_group',
+                'access_token' => '1234567890',
+                'debug_disable_flush' => TRUE,
+                'collector_secure' => true,
+                'transport' => $transportType
+            ];
+            $tracer = new ClientTracer($opts);
+            $transport = $this->peek($tracer, '_transport');
+            $tracerOptions = $this->peek($tracer, '_options');
+            $transport->ensureConnection($tracerOptions);
+
+            $scheme = $this->peek($transport, '_scheme');
+            $this->assertSame('tls://', $scheme);
+        }
+    }
+
+    public function testCanOverrideTransportScheme() {
+        $transports = ['http_json', 'http_proto'];
+        $expectedScheme = 'https://';
+
+        foreach ($transports as $transportType) {
+            $opts = [
+                'component_name' => 'test_group',
+                'access_token' => '1234567890',
+                'debug_disable_flush' => TRUE,
+                'collector_secure' => true,
+                'collector_scheme' => $expectedScheme,
+                'transport' => $transportType
+            ];
+            $tracer = new ClientTracer($opts);
+            $transport = $this->peek($tracer, '_transport');
+            $tracerOptions = $this->peek($tracer, '_options');
+            $transport->ensureConnection($tracerOptions);
+
+            $scheme = $this->peek($transport, '_scheme');
+            $this->assertSame($expectedScheme, $scheme);
+        }
+    }
 }
