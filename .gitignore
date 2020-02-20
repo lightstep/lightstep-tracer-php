@@ -4,3 +4,7 @@ intermediate/
 # Ignore only the top-level vendor directory
 /vendor/
 /tmp/
+
+# don't force consumers of the library to use
+# dev time dependencies
+composer.lock
