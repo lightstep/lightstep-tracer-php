@@ -55,8 +55,8 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
 
         $defaults = [
             'collector_host'            => 'collector.lightstep.com',
-            'collector_port'            => 80,
-            'collector_secure'          => false,
+            'collector_port'            => 443,
+            'collector_secure'          => true,
 
             'transport'                 => 'http_json',
             'max_log_records'           => 1000,
