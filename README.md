@@ -52,6 +52,8 @@ LightStep::initGlobalTracer('examples/trivial_process', '{your_access_token}', [
 ]);
 ```
 
+By default the the tracer sends trace data securely to the public LightStep satellites at `collector.lightstep.com` over port `443` using TLS.
+
 ## Developer Setup
 
 ```bash
