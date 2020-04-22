@@ -20,7 +20,7 @@
             "lib/LightStep.php"
         ]
     },
-    "version": "1.0.62",
+    "version": "1.1.0",
     "config": {
         "sort-packages": true
     }
