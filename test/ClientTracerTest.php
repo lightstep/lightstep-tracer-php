@@ -97,7 +97,6 @@ class ClientTracerTest extends BaseLightStepTest
                 'component_name' => 'test_group',
                 'access_token' => '1234567890',
                 'debug_disable_flush' => TRUE,
-                'collector_secure' => true,
                 'transport' => $transportType
             ];
             $tracer = new ClientTracer($opts);
@@ -107,6 +106,8 @@ class ClientTracerTest extends BaseLightStepTest
 
             $scheme = $this->peek($transport, '_scheme');
             $this->assertSame('tls://', $scheme);
+            $port = $this->peek($transport, '_port');
+            $this->assertSame(443, $port);
         }
     }
 
@@ -119,7 +120,6 @@ class ClientTracerTest extends BaseLightStepTest
                 'component_name' => 'test_group',
                 'access_token' => '1234567890',
                 'debug_disable_flush' => TRUE,
-                'collector_secure' => true,
                 'collector_scheme' => $expectedScheme,
                 'transport' => $transportType
             ];
@@ -130,6 +130,29 @@ class ClientTracerTest extends BaseLightStepTest
 
             $scheme = $this->peek($transport, '_scheme');
             $this->assertSame($expectedScheme, $scheme);
+        }
+    }
+
+    public function testSendDataInPlainText() {
+        $transports = ['http_json', 'http_proto'];
+
+        foreach ($transports as $transportType) {
+            $opts = [
+                'component_name' => 'test_group',
+                'access_token' => '1234567890',
+                'debug_disable_flush' => TRUE,
+                'transport' => $transportType,
+                'collector_secure' => FALSE
+            ];
+            $tracer = new ClientTracer($opts);
+            $transport = $this->peek($tracer, '_transport');
+            $tracerOptions = $this->peek($tracer, '_options');
+            $transport->ensureConnection($tracerOptions);
+
+            $scheme = $this->peek($transport, '_scheme');
+            $this->assertSame('', $scheme); //pfsockopen uses http:// when empty
+            $port = $this->peek($transport, '_port');
+            $this->assertSame(80, $port);
         }
     }
 }
