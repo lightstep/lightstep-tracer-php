@@ -6,12 +6,11 @@ use Lightstep\Collector\Reference\Relationship;
 use Lightstep\Collector\Span;
 use Lightstep\Collector\SpanContext;
 use Google\Protobuf\Timestamp;
-use LightStepBase\Tracer;
 
 require_once(dirname(__FILE__) . "/Util.php");
 require_once(dirname(__FILE__) . "/../../thrift/CroutonThrift/Types.php");
 
-class ClientSpan implements \LightStepBase\Span {
+class ClientSpan implements \OpenTracing\Span {
 
     protected $_tracer = NULL;
 
@@ -76,22 +75,30 @@ class ClientSpan implements \LightStepBase\Span {
         return $this;
     }
 
-    public function finish() {
-        $this->_tracer->_finishSpan($this);
+    public function getOperationName() {
+        return $this->_operation;
     }
 
-    public function setOperationName($name) {
+    public function getContext() {
+        return new ClientSpanContext(
+            $this->traceGUID(),
+            $this->guid(),
+            true,
+            $this->getBaggage()
+        );
+    }
+
+    public function finish($finishTime = NULL) {
+        $this->_tracer->_finishSpan($this, $finishTime);
+    }
+
+    public function overwriteOperationName($name) {
         $this->_operation = $name;
         return $this;
     }
 
     public function addTraceJoinId($key, $value) {
         $this->_joinIds[$key] = $value;
-        return $this;
-    }
-
-    public function setEndUserId($id) {
-        $this->addTraceJoinId(LIGHTSTEP_JOIN_KEY_END_USER_ID, $id);
         return $this;
     }
 
@@ -107,7 +114,7 @@ class ClientSpan implements \LightStepBase\Span {
         return $this;
     }
 
-    public function setBaggageItem($key, $value) {
+    public function addBaggageItem($key, $value) {
         $this->_baggage[$key] = $value;
         return $this;
     }
@@ -153,7 +160,7 @@ class ClientSpan implements \LightStepBase\Span {
         ]);
     }
 
-    public function log($fields) {
+    public function log(array $fields = [], $timestamp = NULL) {
         $record = [
             'span_guid' => strval($this->_guid),
         ];
@@ -163,7 +170,9 @@ class ClientSpan implements \LightStepBase\Span {
             $record['event'] = strval($fields['event']);
         }
 
-        if (!empty($fields['timestamp'])) {
+        if ($timestamp) {
+            $record['timestamp_micros'] = intval(1000 * $timestamp);
+        } else if (!empty($fields['timestamp'])) {
             $record['timestamp_micros'] = intval(1000 * $fields['timestamp']);
         }
         // no need to verify value of fields['payload'] as it will be checked by _rawLogRecord
@@ -332,5 +341,11 @@ class ClientSpan implements \LightStepBase\Span {
             'logs' => $logs,
             'references' => $references,
         ]);
+    }
+
+    /** Deprecated */
+    public function setEndUserId($id) {
+        $this->addTraceJoinId("LIGHTSTEP_JOIN_KEY_END_USER_ID", $id);
+        return $this;
     }
 }

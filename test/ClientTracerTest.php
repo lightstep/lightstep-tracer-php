@@ -155,4 +155,64 @@ class ClientTracerTest extends BaseLightStepTest
             $this->assertSame(80, $port);
         }
     }
+
+    public function testInject() {
+        $tracer = $this->createTestTracer("test_group", "1234567890");
+        $span = $tracer->startSpan("hello/world");
+
+        $carrier = array();
+        $tracer->inject($span->getContext(), \OpenTracing\Formats\TEXT_MAP, $carrier);
+        $this->assertEquals($carrier['ot-tracer-spanid'], $span->guid());
+        $this->assertEquals($carrier['ot-tracer-traceid'], $span->traceGUID());
+        $this->assertEquals($carrier['ot-tracer-sampled'], 'true');
+        $span->finish();
+    }
+
+    public function testInjectAndExtract() {
+        $tracer = $this->createTestTracer("test_group", "1234567890");
+        $span = $tracer->startSpan("hello/world");
+
+        $carrier = array();
+        $tracer->inject($span->getContext(), \OpenTracing\Formats\TEXT_MAP, $carrier);
+        $span->finish();
+
+        $spanContext = $tracer->extract(\OpenTracing\Formats\TEXT_MAP, $carrier);
+        $this->assertEquals($spanContext->getTraceId(),$span->traceGUID());
+        $this->assertEquals($spanContext->getSpanId(),$span->guid());
+        $this->assertEquals($spanContext->isSampled(),true);
+    }
+
+    public function testInjectExtractWithBaggage() {
+        $tracer = $this->createTestTracer("test_group", "1234567890");
+        $span = $tracer->startSpan("hello/world");
+        $span->addBaggageItem("fruit", "apple");
+        $span->addBaggageItem("number", 5);
+        $span->addBaggageItem("boolean", true);
+        $span->finish();
+
+        $carrier = array();
+        $tracer->inject($span->getContext(), \OpenTracing\Formats\TEXT_MAP, $carrier);
+        $span->finish();
+
+        $spanContext = $tracer->extract(\OpenTracing\Formats\TEXT_MAP, $carrier);
+        $this->assertEquals(count($spanContext->getBaggage()), 3);
+        $this->assertEquals($spanContext->getBaggageItem("fruit"), "apple");
+        $this->assertEquals($spanContext->getBaggageItem("number"), 5);
+        $this->assertEquals($spanContext->getBaggageItem("boolean"), true);
+    }
+
+    public function testStartSpanFromSpanContext() {
+        $tracer = $this->createTestTracer("test_group", "1234567890");
+        $span = $tracer->startSpan("hello/world");
+
+        $carrier = array();
+        $tracer->inject($span->getContext(), \OpenTracing\Formats\TEXT_MAP, $carrier);
+        $span->finish();
+
+        $spanContext = $tracer->extract(\OpenTracing\Formats\TEXT_MAP, $carrier);
+        $child = $tracer->startSpan("hello/child", ["child_of" => $spanContext]);
+        $this->assertEquals($child->traceGUID(),$span->traceGUID());
+        $this->assertEquals($child->getParentGUID(),$span->guid());
+    }
+
 }

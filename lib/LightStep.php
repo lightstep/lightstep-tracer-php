@@ -1,6 +1,7 @@
 <?php
 
-use LightStepBase\Span;
+//use LightStepBase\Span;
+use OpenTracing\Span;
 
 require_once(__DIR__ . '/vendor/Thrift/Type/TType.php');
 require_once(__DIR__ . '/Client/ClientTracer.php');
@@ -33,7 +34,7 @@ class LightStep {
      * in library code with more than possible first entry-point, this may
      * be helpful.
      *
-     * @return \LightStepBase\Tracer
+     * @return \OpenTracing\Tracer
      * @throws Exception if the component name or access token is not a valid string
      * @throws Exception if the tracer singleton has already been initialized
      */
@@ -71,7 +72,7 @@ class LightStep {
      *
      * @param $component_name Component name to use for the tracer
      * @param $access_token The project access token
-     * @return \LightStepBase\Tracer
+     * @return \OpenTracing\Tracer
      * @throws Exception if the group name or access token is not a valid string
      */
     public static function getInstance($component_name = NULL, $access_token = NULL, $opts = NULL) {
@@ -87,7 +88,7 @@ class LightStep {
      *
      * @param $component_name Component name to use for the tracer
      * @param $access_token The project access token
-     * @return \LightStepBase\Tracer
+     * @return \OpenTracing\Tracer
      * @throws Exception if the group name or access token is not a valid string.
      */
     public static function newTracer ($component_name, $access_token, $opts = NULL) {
@@ -112,7 +113,7 @@ class LightStep {
      */
 
     /**
-     * @return \LightStepBase\Span
+     * @return \OpenTracing\Span
      */
     public static function startSpan($operationName, $fields = NULL) {
         return self::getInstance()->startSpan($operationName, $fields);
