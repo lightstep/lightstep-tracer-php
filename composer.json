@@ -3,6 +3,7 @@
     "description": "LightStep instrumentation API",
     "license": "MIT",
     "require": {
+        "php": "^7.1",
         "ext-bcmath": "*",
         "google/protobuf": ">=3.6.1",
         "opentracing/opentracing": "^1.0.0-beta6",
