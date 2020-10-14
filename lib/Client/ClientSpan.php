@@ -200,7 +200,7 @@ class ClientSpan implements \LightStepBase\Span {
         $this->_rawLogRecord([
             'span_guid' => strval($this->_guid),
             'level' => $level,
-            'error_flag' => $errorFlag,
+            'error_flag' => $errorFlag ? 'true' : 'false',
             'message' => $text,
         ], $allArgs);
         return $text;
