@@ -45,6 +45,9 @@ class LightStep {
         if (!is_string($access_token) || strlen($access_token) == 0) {
             throw new Exception("Invalid access_token");
         }
+        if (PHP_INT_SIZE < 8) {
+            throw new Exception("lightstep-tracer-php can only be used on 64 bit PHP platforms. Please change your PHP runtime to a 64 bit version before using this module.");
+        }
 
         // If the singleton has already been created, treat the initialization
         // as an options() call instead.
