@@ -11,6 +11,7 @@ class RuntimeDisableTest extends BaseLightStepTest {
         $span->addTraceJoinId("key_to_an", "unused_value");
         $span->warnf("Shouldn't do anything");
         $span->errorf("Shouldn't do anything");
+        $span->fatalf("Shouldn't do anything");
         $span->finish();
     }
 }

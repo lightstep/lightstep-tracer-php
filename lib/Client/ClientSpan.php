@@ -24,6 +24,7 @@ class ClientSpan implements \LightStepBase\Span {
     protected $_endMicros = 0;
     protected $_errorFlag = false;
     protected $_runtimeGUID = "";
+    protected $_dieOnFatal = true;
 
     protected $_joinIds = [];
     protected $_logRecords = [];
@@ -189,7 +190,14 @@ class ClientSpan implements \LightStepBase\Span {
     public function fatalf($fmt) {
         $this->_errorFlag = true;
         $text = $this->_log('F', true, $fmt, func_get_args());
-        die($text);
+        if ($this->_dieOnFatal) {
+            die($text);
+        }
+        return $this;
+    }
+
+    public function setDieOnFatal($dieOnFatal) {
+        $this->_dieOnFatal = $dieOnFatal;
     }
 
     protected function _log($level, $errorFlag, $fmt, $allArgs) {

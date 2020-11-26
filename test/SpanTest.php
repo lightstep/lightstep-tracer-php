@@ -51,6 +51,8 @@ class SpanTest extends BaseLightStepTest {
         $span->infof("Test %d %f %s", 1, 2.0, "three");
         $span->warnf("Test %d %f %s", 1, 2.0, "three");
         $span->errorf("Test %d %f %s", 1, 2.0, "three");
+        $span->setDieOnFatal(false);
+        $span->fatalf("Test %d %f %s", 1, 2.0, "three");
         $span->finish();
     }
 
