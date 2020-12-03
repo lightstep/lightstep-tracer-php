@@ -34,4 +34,5 @@ class NoOpSpan implements \LightStepBase\Span {
     public function warnf($fmt) {}
     public function errorf($fmt) {}
     public function fatalf($fmt) {}
+    public function setDieOnFatal($dieOnFatal) {}
 }

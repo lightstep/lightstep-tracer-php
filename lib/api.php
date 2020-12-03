@@ -249,10 +249,6 @@ interface Span {
      * Creates a printf-style error log statement that will be associated with
      * this particular operation instance.
      *
-     * If the runtime is enabled, the implementation *will* call die() after
-     * creating the log (if the runtime is disabled, the log record will
-     * not be created and the die() call will not be made).
-     *
      * @param string $fmt a format string as accepted by sprintf
      */
     public function errorf($fmt);
@@ -261,9 +257,21 @@ interface Span {
      * Creates a printf-style fatal log statement that will be associated with
      * this particular operation instance.
      *
+     * If the runtime is enabled, the implementation *will* call die() after
+     * creating the log. If the runtime is disabled, the log record will
+     * not be created and the die() call will not be made.
+     *
      * @param string $fmt a format string as accepted by sprintf
      */
     public function fatalf($fmt);
+
+    /**
+     * Provides a mechanism to prevent fatalf from calling die() after
+     * creating a log.
+     *
+     * @param bool $dieOnFatal
+     */
+    public function setDieOnFatal($dieOnFatal);
 
     // ---------------------------------------------------------------------- //
     // Deprecated
