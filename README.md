@@ -1,5 +1,7 @@
 # lightstep-tracer-php
 
+> ❗ **This instrumentation is no longer recommended**. Please review [documentation on setting up and configuring the OpenTelemetry PHP API and SDK ](https://github.com/open-telemetry/opentelemetry-php) for more information on using OpenTelemetry with PHP.
+
 [![Latest Stable Version](https://poser.pugx.org/lightstep/tracer/v/stable)](https://packagist.org/packages/lightstep/tracer)
 [![Circle CI](https://circleci.com/gh/lightstep/lightstep-tracer-php.svg?style=shield)](https://circleci.com/gh/lightstep/lightstep-tracer-php)
 [![MIT license](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
