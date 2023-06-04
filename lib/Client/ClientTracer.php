@@ -1,13 +1,12 @@
 <?php
 namespace LightStepBase\Client;
 
-use LightStepBase\Span;
+use OpenTracing\Formats;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 
-require_once(dirname(__FILE__) . "/../api.php");
 require_once(dirname(__FILE__) . "/ClientSpan.php");
-require_once(dirname(__FILE__) . "/NoOpSpan.php");
+require_once(dirname(__FILE__) . "/ClientSpanContext.php");
 require_once(dirname(__FILE__) . "/Util.php");
 require_once(dirname(__FILE__) . "/Transports/TransportUDP.php");
 require_once(dirname(__FILE__) . "/Transports/TransportHTTPJSON.php");
@@ -19,13 +18,13 @@ require_once(dirname(__FILE__) . "/KeyValue.php");
 require_once(dirname(__FILE__) . "/ReportRequest.php");
 require_once(dirname(__FILE__) . "/LogRecord.php");
 
-define('CARRIER_TRACER_STATE_PREFIX', 'ot-tracer-');
-define('CARRIER_BAGGAGE_PREFIX', 'ot-baggage-');
+define('OT_CARRIER_TRACER_PREFIX', 'ot-tracer-');
+define('OT_CARRIER_BAGGAGE_PREFIX', 'ot-baggage-');
 
 /**
  * Main implementation of the Tracer interface
  */
-class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
+class ClientTracer implements \OpenTracing\Tracer, LoggerAwareInterface {
 
     use LoggerAwareTrait;
 
@@ -219,24 +218,50 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
         $this->_spanRecords = [];
     }
 
+    /**
+     * 
+     *
+     * OpenTracing API TODO Noop for now
+     */
+
+    //public function getScopeManager(): ScopeManager;
+    public function getScopeManager() {}
+    //public function getActiveSpan(): ?Span;
+    public function getActiveSpan() {}
+    //public function startActiveSpan(string $operationName, $options = []): Scope;
+    public function startActiveSpan($operationName, $options = []) {}
+    //public function extract(string $format, $carrier): ?SpanContext;
+
+    // end TODO
+    
+
     public function startSpan($operationName, $fields = NULL) {
         if (!$this->_enabled) {
             return new NoOpSpan;
         }
 
         $span = new ClientSpan($this, $this->_options['max_payload_depth']);
-        $span->setOperationName($operationName);
+        $span->overwriteOperationName($operationName);
         $span->setStartMicros($this->_util->nowMicros());
 
         if ($fields != NULL) {
-            if (isset($fields['parent'])) {
-                $span->setParent($fields['parent']);
+            if (isset($fields['child_of']) || isset($fields['parent'])) {
+                $parent = isset($fields['child_of']) ? $fields['child_of'] : $fields['parent'];
+
+                if ($parent instanceof ClientSpanContext) {
+                    // Update Trace ID and Parent ID
+                    $span->setTraceGUID($parent->getTraceId());
+                    $span->setParentGUID($parent->getSpanId());
+                } else if ($parent instanceof ClientSpan) {
+                    // Otherwise handle as usual
+                    $span->setParent($parent);
+                }
             }
             if (isset($fields['tags'])) {
                 $span->setTags($fields['tags']);
             }
-            if (isset($fields['startTime'])) {
-                $span->setStartMicros($fields['startTime'] * 1000);
+            if (isset($fields['start_time'])) {
+                $span->setStartMicros($fields['start_time'] * 1000);
             }
         }
         return $span;
@@ -245,14 +270,10 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
     /**
      * Copies the span data into the given carrier object.
      */
-    public function inject(Span $span, $format, &$carrier) {
+    public function inject(\OpenTracing\SpanContext $spanContext, $format, &$carrier) {
         switch ($format) {
-        case LIGHTSTEP_FORMAT_TEXT_MAP:
-            $this->injectToArray($span, $carrier);
-            break;
-
-        case LIGHTSTEP_FORMAT_BINARY:
-            throw new \Exception('FORMAT_BINARY not yet implemented');
+        case Formats\TEXT_MAP:
+            $this->injectToArray($spanContext, $carrier);
             break;
 
         default:
@@ -261,16 +282,17 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
         }
     }
 
-    protected function injectToArray(Span $span, &$carrier) {
-        $carrier[CARRIER_TRACER_STATE_PREFIX . 'spanid'] = $span->guid();
-        $traceGUID = $span->traceGUID();
+    protected function injectToArray(\OpenTracing\SpanContext $spanContext, &$carrier) {
+        $carrier[OT_CARRIER_TRACER_PREFIX . 'spanid'] = $spanContext->getSpanId();
+        $traceGUID = $spanContext->getTraceId();
         if ($traceGUID) {
-            $carrier[CARRIER_TRACER_STATE_PREFIX . 'traceid'] = $traceGUID;
+            $carrier[OT_CARRIER_TRACER_PREFIX . 'traceid'] = $traceGUID;
         }
-        $carrier[CARRIER_TRACER_STATE_PREFIX . 'sampled'] = 'true';
+        // Always set to true
+        $carrier[OT_CARRIER_TRACER_PREFIX . 'sampled'] = 'true';
 
-        foreach ($span->getBaggage() as $key => $value) {
-            $carrier[CARRIER_BAGGAGE_PREFIX . $key] = $value;
+        foreach ($spanContext->getBaggage() as $key => $value) {
+            $carrier[OT_CARRIER_BAGGAGE_PREFIX . $key] = $value;
         }
     }
 
@@ -279,16 +301,12 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
      */
     public function join($operationName, $format, $carrier) {
         $span = new ClientSpan($this, $this->_options['max_payload_depth']);
-        $span->setOperationName($operationName);
+        $span->overwriteOperationName($operationName);
         $span->setStartMicros($this->_util->nowMicros());
 
         switch ($format) {
-        case LIGHTSTEP_FORMAT_TEXT_MAP:
+        case Formats\TEXT_MAP:
             $this->joinFromArray($span, $carrier);
-            break;
-
-        case LIGHTSTEP_FORMAT_BINARY:
-            throw new \Exception('FORMAT_BINARY not yet implemented');
             break;
 
         default:
@@ -298,11 +316,11 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
         return $span;
     }
 
-    protected function joinFromArray(Span $span, $carrier) {
+    protected function joinFromArray(ClientSpan $span, $carrier) {
         foreach ($carrier as $rawKey => $value) {
             $key = strtolower($rawKey);
-            if ($this->_startsWith($key, CARRIER_TRACER_STATE_PREFIX)) {
-                $shortKey = substr($key, strlen(CARRIER_TRACER_STATE_PREFIX));
+            if ($this->_startsWith($key, OT_CARRIER_TRACER_PREFIX)) {
+                $shortKey = substr($key, strlen(OT_CARRIER_TRACER_PREFIX));
                 switch ($shortKey) {
                 case 'traceid':
                     $span->setTraceGUID($value);
@@ -311,8 +329,8 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
                     $span->setParentGUID($value);
                     break;
                 }
-            } else if ($this->_startsWith($key, CARRIER_BAGGAGE_PREFIX)) {
-                $shortKey = substr($key, strlen(CARRIER_BAGGAGE_PREFIX));
+            } else if ($this->_startsWith($key, OT_CARRIER_BAGGAGE_PREFIX)) {
+                $shortKey = substr($key, strlen(OT_CARRIER_BAGGAGE_PREFIX));
                 $span->setBaggageItem($shortKey, $value);
             } else {
                 // By convention, LightStep join() ignores unrecognized key-value
@@ -320,6 +338,53 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
             }
         }
     }
+
+    /**
+     * Creates a new SpanContext from the given carrier object and specified format.
+     */
+    public function extract($format, $carrier) {
+        switch($format) {
+        case Formats\TEXT_MAP:
+            return $this->extractTextMap($carrier);
+            break;
+
+        default:
+            $this->_debugRecordError('Unknown inject format');
+            break;
+        }
+    }
+
+    /**
+     * Creates a new SpanContext for Lightstep from the given carrier object.
+     */
+    protected function extractTextMap($carrier) {
+        $traceid = '';
+        $spanid = '';
+        $baggageItems = array();
+        foreach ($carrier as $rawkey => $value) {
+            $key = strtolower($rawkey);
+            if ($this->_startsWith($key, OT_CARRIER_TRACER_PREFIX)) {
+                $shortKey = substr($key, strlen(OT_CARRIER_TRACER_PREFIX));
+                switch($shortKey) {
+                case 'traceid':
+                    $traceid = $value;
+                    break;
+                case 'spanid':
+                    $spanid = $value;
+                }
+            } else if ($this->_startsWith($key, OT_CARRIER_BAGGAGE_PREFIX)) {
+                $shortKey = substr($key, strlen(OT_CARRIER_BAGGAGE_PREFIX));
+                $baggageItems = array_merge($baggageItems, [$shortKey => $value]);
+            }
+        }
+        return new ClientSpanContext(
+            $traceid,
+            $spanid,
+            true,
+            $baggageItems
+        );
+    }
+    
 
     protected function _startsWith($haystack, $needle) {
          return (substr($haystack, 0, strlen($needle)) === $needle);
@@ -454,12 +519,17 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
     /**
      * Internal use only.
      */
-    public function _finishSpan(ClientSpan $span) {
+    public function _finishSpan(ClientSpan $span, $finishTime = NULL) {
         if (!$this->_enabled) {
             return;
         }
 
-        $span->setEndMicros($this->_util->nowMicros());
+        if ($finishTime) {
+            $span->setEndMicros(intval(1000 * $timestamp));
+        } else {
+            $span->setEndMicros($this->_util->nowMicros());
+        }
+        
         $success = Util::pushIfSpaceAllows(
             $this->_spanRecords,
             $span,

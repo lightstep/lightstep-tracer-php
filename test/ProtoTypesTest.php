@@ -17,7 +17,7 @@ class ProtoTypesTest extends BaseLightStepTest {
     public function testClientSpanToProto() {
         $tracer = new \LightStepBase\Client\ClientTracer();
         $span = new \LightStepBase\Client\ClientSpan($tracer, 5);
-        $span->setOperationName("my_operation");
+        $span->overwriteOperationName("my_operation");
         $span->setStartMicros(1538476581123456);
         $span->setEndMicros(1538476581124456);
         $span->setParentGUID("513887a3b3f460d8");
@@ -147,7 +147,7 @@ class ProtoTypesTest extends BaseLightStepTest {
 
         $tracer = new \LightStepBase\Client\ClientTracer();
         $span = new \LightStepBase\Client\ClientSpan($tracer, 5);
-        $span->setOperationName("my_operation");
+        $span->overwriteOperationName("my_operation");
         $span->setStartMicros(1538476581123456);
         $span->setEndMicros(1538476581124456);
         $span->setParentGUID("513887a3b3f460d8");

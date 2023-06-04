@@ -3,10 +3,12 @@
     "description": "LightStep instrumentation API",
     "license": "MIT",
     "require": {
-        "ruafozy/mersenne-twister": "^1.3",
-        "google/protobuf": ">=3.6.1",
+        "php": "^7.1",
         "ext-bcmath": "*",
-        "psr/log": "^1.0"
+        "google/protobuf": ">=3.6.1",
+        "opentracing/opentracing": "^1.0.0-beta6",
+        "psr/log": "^1.0",
+        "ruafozy/mersenne-twister": "^1.3"
     },
     "require-dev": {
         "phpdocumentor/phpdocumentor": "^2.8.5",
