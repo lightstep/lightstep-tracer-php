@@ -7,5 +7,4 @@ intermediate/
 
 # don't force consumers of the library to use
 # dev time dependencies
-composer.lock
 package-lock.json
