@@ -45,6 +45,9 @@ class SpanTest extends BaseLightStepTest {
         $this->assertEquals(count($this->peek($span, "_joinIds")), 2);
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testSpanLogging() {
         $tracer = $this->createTestTracer("test_group", "1234567890");
         $span = $tracer->startSpan("log_span");

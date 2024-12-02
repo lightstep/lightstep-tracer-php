@@ -11,6 +11,9 @@ class TestClass001 {
 
 class PayloadsTest extends BaseLightStepTest {
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testDataTypes() {
         $runtime = $this->createTestTracer("test_group", "1234567890");
         $span = $runtime->startSpan('test_span');
@@ -54,6 +57,9 @@ class PayloadsTest extends BaseLightStepTest {
         $span->finish();
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testDataTypes2() {
         $runtime = $this->createTestTracer("test_group", "1234567890");
         $span = $runtime->startSpan('test_span');
@@ -99,6 +105,9 @@ class PayloadsTest extends BaseLightStepTest {
         $span->finish();
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testCircularReferences() {
         $runtime = $this->createTestTracer("test_group", "1234567890");
         $span = $runtime->startSpan('test_span');
@@ -121,6 +130,9 @@ class PayloadsTest extends BaseLightStepTest {
         return $arr;
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testDeeplyNested() {
         $runtime = $this->createTestTracer("test_group", "1234567890");
         $span = $runtime->startSpan('test_span');

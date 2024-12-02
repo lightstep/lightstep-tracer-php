@@ -13,10 +13,13 @@ class ClientTracerTest extends BaseLightStepTest
      */
     public function testCorrectTransportSelected($key, $class)
     {
-
         $tracer = new ClientTracer(['transport' => $key]);
 
-        $this->assertInstanceOf($class, $this->readAttribute($tracer, '_transport'));
+        $reflection = new ReflectionClass($tracer);
+        $property = $reflection->getProperty('_transport');
+        $property->setAccessible(true);
+        $tracerTransport = $property->getValue($tracer);
+        $this->assertInstanceOf($class, $tracerTransport);
     }
 
     public function transports()
@@ -61,7 +64,7 @@ class ClientTracerTest extends BaseLightStepTest
         $attributes = $this->peek($tracer, '_options')['attributes'];
 
         $this->assertArrayHasKey('foo', $attributes);
-        $this->assertSame($attributes['foo'], 'bar');
+        $this->assertSame('bar', $attributes['foo']);
     }
 
     public function testAddingCustomAttributeDoesNotRemoveDefaultAttributes() {

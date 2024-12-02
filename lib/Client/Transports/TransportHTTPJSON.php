@@ -19,7 +19,7 @@ class TransportHTTPJSON {
      */
     protected $logger;
 
-    public function __construct(LoggerInterface $logger = null) {
+    public function __construct(?LoggerInterface $logger = null) {
 
         $this->logger = $logger ?: new SystemLogger;
         $this->_timeout = ini_get("default_socket_timeout");

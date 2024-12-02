@@ -6,6 +6,9 @@ class InitializationTest extends BaseLightStepTest {
         If data collection is started before the runtime is configuration is
         completed, the runtime should buffer that data until the init call.
      */
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testOutOfOrderInitializationDoesntFail() {
         $opts = [
             "debug_disable_flush" => "true"

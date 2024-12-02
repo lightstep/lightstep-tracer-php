@@ -10,13 +10,13 @@ class TransportUDP {
 
     protected $_sock = NULL;
     protected $_host = NULL;
-    protected $_post = NULL;
+    protected $_port = NULL;
     /**
      * @var LoggerInterface
      */
     protected $logger;
 
-    public function __construct(LoggerInterface $logger = null) {
+    public function __construct(?LoggerInterface $logger = null) {
 
         $this->logger = $logger ?: new SystemLogger;
     }

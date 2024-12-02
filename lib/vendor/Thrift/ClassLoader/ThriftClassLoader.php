@@ -18,7 +18,7 @@
  * under the License.
  *
  * ClassLoader to load Thrift library and definitions
- * Inspired from UniversalClassLoader from Symfony 2 
+ * Inspired from UniversalClassLoader from Symfony 2
  *
  * @package thrift.classloader
  */
@@ -146,7 +146,7 @@ class ThriftClassLoader
             foreach ($this->namespaces as $ns => $dirs)
             {
                 //Don't interfere with other autoloaders
-                if (0 !== strpos($namespace, $ns))
+                if (!str_starts_with($namespace, $ns))
                 {
                     continue;
                 }
@@ -184,7 +184,7 @@ class ThriftClassLoader
             foreach ($this->definitions as $ns => $dirs)
             {
                 //Don't interfere with other autoloaders
-                if (0 !== strpos($namespace, $ns))
+                if (!str_starts_with($namespace, $ns))
                 {
                     continue;
                 }

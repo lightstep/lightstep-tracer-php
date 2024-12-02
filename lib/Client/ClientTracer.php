@@ -322,7 +322,7 @@ class ClientTracer implements \LightStepBase\Tracer, LoggerAwareInterface {
     }
 
     protected function _startsWith($haystack, $needle) {
-         return (substr($haystack, 0, strlen($needle)) === $needle);
+         return (str_starts_with($haystack, $needle));
     }
 
     // PHP does not have an event loop or timer threads. Instead manually check as
