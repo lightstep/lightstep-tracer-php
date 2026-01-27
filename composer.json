@@ -10,7 +10,7 @@
     },
     "require-dev": {
         "phpdocumentor/phpdocumentor": "^2.8.5",
-        "phpunit/phpunit": "~4.8.20"
+        "phpunit/phpunit": "~8.5.52"
     },
     "autoload": {
         "psr-4": {
